@@ -518,13 +518,13 @@ export function GameScreen({
 
           {/* You — bottom centre */}
           <div className="hero-seat">{renderSeat(human, humanIndex, true)}</div>
-        </div>
 
-        {/* Transient pop-up bubbles for play & advice */}
-        <div className="toasts" data-no-snapshot="true">
-          {toasts.map((t) => (
-            <div key={t.key} className={`toast ${t.kind}`}>{t.text}</div>
-          ))}
+          {/* Transient pop-up bubbles for play & advice — under the board */}
+          <div className="toasts" data-no-snapshot="true">
+            {toasts.map((t) => (
+              <div key={t.key} className={`toast ${t.kind}`}>{t.text}</div>
+            ))}
+          </div>
         </div>
       </div>
 

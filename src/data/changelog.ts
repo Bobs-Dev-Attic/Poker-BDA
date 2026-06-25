@@ -14,6 +14,15 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.3.3',
+    date: '2026-06-25',
+    title: 'Bubbles under the board',
+    highlights: ['Pop-up bubbles now appear below the community cards'],
+    changes: [
+      { type: 'changed', text: 'Moved the pop-up bubbles from the top of the screen to just under the community cards.' },
+    ],
+  },
+  {
     version: '1.3.2',
     date: '2026-06-25',
     title: 'Swipe the panels',

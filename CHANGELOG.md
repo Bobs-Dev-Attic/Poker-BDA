@@ -4,6 +4,12 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.3.3] - 2026-06-25 — "Bubbles under the board"
+
+### Changed
+- Moved the pop-up bubbles from the top of the screen to just under the
+  community cards.
+
 ## [1.3.2] - 2026-06-25 — "Swipe the panels"
 
 ### Added
@@ -174,6 +180,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.3.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.3
 [1.3.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.2
 [1.3.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.1
 [1.3.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.0

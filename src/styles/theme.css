@@ -369,7 +369,7 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 /* ----- Pop-up bubbles (toasts) ----- */
 .toasts {
   position: absolute;
-  top: 50px;
+  top: 60%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 28;
