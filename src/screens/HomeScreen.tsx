@@ -2,10 +2,12 @@ import type { Screen } from '../App'
 import { APP_NAME, APP_VERSION } from '../version'
 import { useSettings } from '../state/settings'
 import { GAME_GUIDES } from '../data/learn'
+import { hasResumableGame } from '../state/savedGame'
 
-export function HomeScreen({ go }: { go: (s: Screen) => void }) {
+export function HomeScreen({ go, onResume }: { go: (s: Screen) => void; onResume: () => void }) {
   const { settings } = useSettings()
   const variantName = GAME_GUIDES[settings.variant].name
+  const canResume = hasResumableGame()
 
   return (
     <>
@@ -16,10 +18,19 @@ export function HomeScreen({ go }: { go: (s: Screen) => void }) {
       </div>
 
       <div className="menu-grid">
-        <button className="menu-tile primary wide" onClick={() => go('newgame')}>
+        {canResume && (
+          <button className="menu-tile primary wide" onClick={onResume}>
+            <span className="ico">▶️</span>
+            <span>
+              <span className="t">Resume Game</span>
+              <span className="d">Pick up where you left off</span>
+            </span>
+          </button>
+        )}
+        <button className={`menu-tile wide ${canResume ? '' : 'primary'}`} onClick={() => go('newgame')}>
           <span className="ico">🎲</span>
           <span>
-            <span className="t">Play Now</span>
+            <span className="t">{canResume ? 'New Game' : 'Play Now'}</span>
             <span className="d">Last game: {variantName}</span>
           </span>
         </button>

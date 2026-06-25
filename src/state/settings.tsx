@@ -74,6 +74,13 @@ export interface Stats {
   biggestPot: number
   netChips: number
   gamesPlayed: number
+  // Poker self-analysis metrics (counts; percentages derived in the UI).
+  vpipHands: number // hands you voluntarily put money in preflop
+  pfrHands: number // hands you raised preflop
+  sawFlopHands: number // hands you were still in past preflop
+  wtsdHands: number // hands you reached showdown
+  betRaiseCount: number // total bets + raises (any street)
+  callCount: number // total calls (any street)
 }
 
 export const DEFAULT_STATS: Stats = {
@@ -83,6 +90,12 @@ export const DEFAULT_STATS: Stats = {
   biggestPot: 0,
   netChips: 0,
   gamesPlayed: 0,
+  vpipHands: 0,
+  pfrHands: 0,
+  sawFlopHands: 0,
+  wtsdHands: 0,
+  betRaiseCount: 0,
+  callCount: 0,
 }
 
 const SETTINGS_KEY = 'poker-bda.settings.v1'

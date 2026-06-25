@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSettings } from './state/settings'
 import { APP_NAME, APP_VERSION } from './version'
 import type { TableConfig } from './poker/types'
+import { loadGame, clearGame } from './state/savedGame'
 import { HomeScreen } from './screens/HomeScreen'
 import { NewGameScreen } from './screens/NewGameScreen'
 import { GameScreen } from './screens/GameScreen'
@@ -20,20 +21,32 @@ export type Screen =
   | 'stats'
 
 export function App() {
-  const [screen, setScreen] = useState<Screen>('home')
-  const [table, setTable] = useState<TableConfig | null>(null)
+  // Resume an in-progress game if one was saved before a refresh/reload.
+  const [boot] = useState(() => loadGame())
+  const [screen, setScreen] = useState<Screen>(boot ? 'game' : 'home')
+  const [table, setTable] = useState<TableConfig | null>(boot?.config ?? null)
   const { settings } = useSettings()
 
   const go = (s: Screen) => setScreen(s)
 
   const startGame = (cfg: TableConfig) => {
+    // A brand-new game replaces any saved one.
+    clearGame()
     setTable(cfg)
     setScreen('game')
   }
 
+  const resumeGame = () => {
+    const saved = loadGame()
+    if (saved) {
+      setTable(saved.config)
+      setScreen('game')
+    }
+  }
+
   return (
     <div className={`app ${settings.animations ? 'anim' : ''}`}>
-      {screen === 'home' && <HomeScreen go={go} />}
+      {screen === 'home' && <HomeScreen go={go} onResume={resumeGame} />}
       {screen === 'newgame' && <NewGameScreen go={go} onStart={startGame} />}
       {screen === 'game' && table && (
         <GameScreen config={table} go={go} onRematch={() => setScreen('newgame')} />

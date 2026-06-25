@@ -14,6 +14,21 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.0.3',
+    date: '2026-06-25',
+    title: 'Saved games & deeper stats',
+    highlights: [
+      'Your game is saved — refresh without losing your seat',
+      'New poker metrics to learn from your own play',
+    ],
+    changes: [
+      { type: 'added', text: 'Auto-save: an in-progress game survives a refresh, tab close, or app update.' },
+      { type: 'added', text: '“Resume Game” on the home screen to pick up where you left off.' },
+      { type: 'added', text: 'Stats now track VPIP, PFR, Aggression Factor, WTSD, and W$SD — each with a plain-language explanation and target range.' },
+      { type: 'added', text: 'A playing-style read that tells you if you’re too loose, too tight, or too passive.' },
+    ],
+  },
+  {
     version: '1.0.2',
     date: '2026-06-25',
     title: 'New look',

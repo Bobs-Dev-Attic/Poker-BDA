@@ -4,6 +4,15 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.0.3] - 2026-06-25 — "Saved games & deeper stats"
+
+### Added
+- Auto-save of the in-progress game to the device, so a page refresh, tab
+  close, or PWA auto-update reload no longer loses the current hand.
+- "Resume Game" entry on the home screen.
+- Poker self-analysis metrics in Stats: VPIP, PFR, Aggression Factor, WTSD, and
+  W$SD, each with an explanation and a target range, plus a playing-style read.
+
 ## [1.0.2] - 2026-06-25 — "New look"
 
 ### Added
@@ -42,6 +51,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.0.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.3
 [1.0.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.2
 [1.0.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.1
 [1.0.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.0

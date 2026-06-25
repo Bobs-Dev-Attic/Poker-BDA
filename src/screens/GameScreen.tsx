@@ -17,6 +17,7 @@ import { chooseAction, estimateStrength } from '../poker/ai/ai'
 import type { GameState, TableConfig, Action, Player } from '../poker/types'
 import { PERSONAS, pickChatter } from '../poker/ai/personas'
 import { evaluateHand } from '../poker/handEvaluator'
+import { loadGame, saveGame, clearGame } from '../state/savedGame'
 
 const rng = Math.random
 
@@ -30,17 +31,50 @@ export function GameScreen({
   onRematch: () => void
 }) {
   const { settings, recordStats } = useSettings()
-  const [state, setState] = useState<GameState>(() => createGame(config, rng))
+  const wasRestored = useRef(false)
+  // Restore a saved game if one exists (set up by App on resume), else deal fresh.
+  const [state, setState] = useState<GameState>(() => {
+    const saved = loadGame()
+    if (saved) {
+      wasRestored.current = true
+      return saved.state
+    }
+    return createGame(config, rng)
+  })
   const [raiseTo, setRaiseTo] = useState(0)
   const [discards, setDiscards] = useState<number[]>([])
   const [bubble, setBubble] = useState<{ seat: number; text: string } | null>(null)
   const recordedHand = useRef(0)
-  const prevChips = useRef(config.startingChips)
+  const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
+  // Per-hand tracking of the human's play, for learning metrics.
+  const handFlags = useRef({ voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 })
 
   useEffect(() => setSoundEnabled(settings.sound), [settings.sound])
 
   const humanIndex = state.players.findIndex((p) => p.isHuman)
   const human = state.players[humanIndex]
+
+  // ---- Persist the game so a refresh/PWA-reload doesn't lose it ----
+  useEffect(() => {
+    const over = state.handComplete && state.players.filter((p) => p.chips > 0).length <= 1
+    if (over) clearGame()
+    else saveGame(config, state)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
+
+  // Reset per-hand tracking when a new hand starts.
+  useEffect(() => {
+    handFlags.current = { voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.handNumber])
+
+  // Note when the human sees the flop / draw (still in the hand past preflop).
+  useEffect(() => {
+    const inHand = human && !human.folded && !human.busted
+    const pastPreflop = state.board.length >= 3 || state.street === 'draw' || state.street === 'postdraw'
+    if (inHand && pastPreflop) handFlags.current.sawFlop = true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.board.length, state.street])
 
   // ---- AI turn driver ----
   useEffect(() => {
@@ -74,19 +108,27 @@ export function GameScreen({
       .reduce((m, r) => Math.max(m, r.amount), 0)
     const delta = human.chips - prevChips.current
     prevChips.current = human.chips
+    const f = handFlags.current
+    const humanToShowdown = !!human.result
     recordStats({
       handsPlayed: 1,
       handsWon: humanWon ? 1 : 0,
       showdownsWon: humanWon && wentToShowdown ? 1 : 0,
       biggestPot: biggestWonByHuman,
       netChips: delta,
+      vpipHands: f.voluntary ? 1 : 0,
+      pfrHands: f.raised ? 1 : 0,
+      sawFlopHands: f.sawFlop ? 1 : 0,
+      wtsdHands: humanToShowdown ? 1 : 0,
+      betRaiseCount: f.betRaise,
+      callCount: f.call,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.handComplete, state.handNumber])
 
-  // Count a game once on entry.
+  // Count a game once on entry (only for a freshly dealt game, not a resume).
   useEffect(() => {
-    recordStats({ gamesPlayed: 1 })
+    if (!wasRestored.current) recordStats({ gamesPlayed: 1 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -120,9 +162,22 @@ export function GameScreen({
       if (action.type === 'fold') sfx('fold')
       else if (action.type === 'check') sfx('check')
       else sfx('bet')
+      // Track the human's play style for the learning metrics.
+      const preflop = state.street === 'preflop' || state.street === 'predraw'
+      const f = handFlags.current
+      if (action.type === 'call') {
+        f.call += 1
+        if (preflop) f.voluntary = true
+      } else if (action.type === 'bet' || action.type === 'raise' || action.type === 'allin') {
+        f.betRaise += 1
+        if (preflop) {
+          f.voluntary = true
+          f.raised = true
+        }
+      }
       setState((s) => applyAction(s, action, rng))
     },
-    [],
+    [state.street],
   )
 
   const doFold = () => {
