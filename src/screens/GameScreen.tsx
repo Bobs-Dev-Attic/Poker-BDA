@@ -49,6 +49,7 @@ export function GameScreen({
   const [bubble, setBubble] = useState<{ seat: number; text: string } | null>(null)
   const [lastReview, setLastReview] = useState<string[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
+  const [analysisOpen, setAnalysisOpen] = useState(false)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
@@ -290,7 +291,10 @@ export function GameScreen({
         <div className="seat-id">
           <div className="avatar">{p.isHuman ? '🧑' : p.avatar}</div>
           <div className="nameplate">
-            <div className="nm">{p.name}{state.dealer === i ? ' 🔘' : ''}</div>
+            <div className="nm">
+              <span className="nm-text">{p.name}</span>
+              {state.dealer === i && <span className="dealer-chip" title="Dealer">D</span>}
+            </div>
             <div className="ch">{fmt(p.chips)}{p.allIn ? ' · ALL-IN' : ''}</div>
           </div>
         </div>
@@ -318,8 +322,6 @@ export function GameScreen({
     )
   }
 
-  const actorName = state.players[state.toActIndex]?.name ?? 'Dealer'
-
   return (
     <div className="game-screen">
       {/* Slim header with a menu */}
@@ -327,6 +329,7 @@ export function GameScreen({
         <button className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">☰</button>
         <div className="gh-title">Hand #{state.handNumber}</div>
         <div className="spacer" />
+        <button className="icon-btn" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
         <span className="pill">💰 {fmt(state.pot)}</span>
         {menuOpen && (
           <>
@@ -363,32 +366,22 @@ export function GameScreen({
       {/* Your seat & cards — always visible, even at a full table */}
       <div className="hero-strip">{renderSeat(human, humanIndex, true)}</div>
 
-      {/* Log + analysis, side by side */}
-      <div className="info-row">
-        <div className="log">
-          {state.log.slice(-4).map((l) => (
-            <div key={l.id} className={l.kind}>{l.text}</div>
-          ))}
-        </div>
-        <div className="analysis">
-          {humanTurn && settings.coachMode && coach ? (
-            <>
-              <div className="small">🎓 {coach.hint}</div>
-              <div className="bar"><i style={{ width: `${Math.round(coach.strength * 100)}%` }} /></div>
-              <div className="tiny muted">
-                Win ~{Math.round(coach.strength * 100)}%
-                {coach.potOdds > 0 && ` · Odds ${Math.round(coach.potOdds * 100)}%`}
-              </div>
-            </>
-          ) : humanTurn ? (
-            <div className="small muted">Your move.</div>
-          ) : state.handComplete ? (
-            <div className="small muted">Hand complete.</div>
-          ) : (
-            <div className="small muted">{actorName} is thinking…</div>
-          )}
-        </div>
+      {/* Game-play log (includes winnings) */}
+      <div className="log">
+        {state.log.slice(-4).map((l) => (
+          <div key={l.id} className={l.kind}>{l.text}</div>
+        ))}
       </div>
+
+      {analysisOpen && (
+        <AnalysisDialog
+          state={state}
+          coach={coach}
+          humanTurn={humanTurn}
+          review={lastReview}
+          onClose={() => setAnalysisOpen(false)}
+        />
+      )}
 
       {/* Action area */}
       <div className="action-bar">
@@ -397,10 +390,10 @@ export function GameScreen({
             state={state}
             human={human}
             gameOver={gameOver}
-            review={lastReview}
             onNext={nextHand}
             onRematch={onRematch}
             onHome={() => go('home')}
+            onAnalysis={() => setAnalysisOpen(true)}
           />
         ) : drawTurn ? (
           <DrawPanel
@@ -470,21 +463,20 @@ function HandOverPanel({
   state,
   human,
   gameOver,
-  review,
   onNext,
   onRematch,
   onHome,
+  onAnalysis,
 }: {
   state: GameState
   human: Player
   gameOver: boolean
-  review: string[]
   onNext: () => void
   onRematch: () => void
   onHome: () => void
+  onAnalysis: () => void
 }) {
   const results = state.potResults ?? []
-  const names = (ids: string[]) => ids.map((id) => state.players.find((p) => p.id === id)?.name).join(', ')
   const humanWon = results.some((r) => r.winners.includes(human.id))
 
   useEffect(() => {
@@ -506,25 +498,58 @@ function HandOverPanel({
   }
 
   return (
-    <div>
-      <div className="center" style={{ marginBottom: 8 }}>
-        {results.map((r, i) => (
-          <div key={i}>
-            <span className="winner-name">{names(r.winners)}</span> won {fmt(r.amount)}
-          </div>
-        ))}
-        {human.result && (
-          <div className="small muted">Your hand: {human.result.name}</div>
-        )}
-      </div>
-      {review.length > 0 && (
-        <div className="coach-box" style={{ marginBottom: 8 }}>
-          {review.map((r, i) => (
-            <div key={i} style={{ marginBottom: i < review.length - 1 ? 4 : 0 }}>🎓 {r}</div>
-          ))}
+    <div className="action-buttons">
+      <button className="btn" onClick={onAnalysis}>🎓 Analysis</button>
+      <button className="btn btn-primary" onClick={onNext}>Next Hand →</button>
+    </div>
+  )
+}
+
+function AnalysisDialog({
+  state,
+  coach,
+  humanTurn,
+  review,
+  onClose,
+}: {
+  state: GameState
+  coach: { strength: number; potOdds: number; hint: string } | null
+  humanTurn: boolean
+  review: string[]
+  onClose: () => void
+}) {
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
+        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ margin: 0 }}>🎓 Hand Analysis</h3>
+          <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
         </div>
-      )}
-      <button className="btn btn-primary btn-block" onClick={onNext}>Next Hand →</button>
+
+        {humanTurn && coach ? (
+          <>
+            <div className="small" style={{ marginBottom: 6 }}>{coach.hint}</div>
+            <div className="coach-box" style={{ marginBottom: 0 }}>
+              <div className="tiny muted">Win chance</div>
+              <div className="bar"><i style={{ width: `${Math.round(coach.strength * 100)}%` }} /></div>
+              <div className="row" style={{ justifyContent: 'space-between' }}>
+                <span className="small">~{Math.round(coach.strength * 100)}% to win</span>
+                {coach.potOdds > 0 && <span className="small muted">Pot odds {Math.round(coach.potOdds * 100)}%</span>}
+              </div>
+            </div>
+          </>
+        ) : state.handComplete && review.length > 0 ? (
+          <div>
+            {review.map((r, i) => (
+              <div key={i} className="small" style={{ marginBottom: 6 }}>🎓 {r}</div>
+            ))}
+          </div>
+        ) : (
+          <div className="small muted">Open this on your turn for live odds, or after a hand for a coach review.</div>
+        )}
+
+        <button className="btn btn-primary btn-block" style={{ marginTop: 14 }} onClick={onClose}>Close</button>
+      </div>
     </div>
   )
 }

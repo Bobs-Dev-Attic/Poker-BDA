@@ -14,6 +14,18 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.4',
+    date: '2026-06-25',
+    title: 'Tighter table',
+    highlights: ['Roomier table that fits four opponents per row'],
+    changes: [
+      { type: 'changed', text: 'Tighter table margins and up to four opponents per row (extras wrap below, centered).' },
+      { type: 'changed', text: 'Dealer button now shows as a “D” badge next to the player’s name.' },
+      { type: 'changed', text: 'Winnings now appear in the game-play log instead of a separate panel.' },
+      { type: 'changed', text: 'Hand analysis (live odds and post-hand coaching) moved into a 🎓 dialog you open on demand.' },
+    ],
+  },
+  {
     version: '1.1.3',
     date: '2026-06-25',
     title: 'Bankroll graph',

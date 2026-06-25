@@ -4,6 +4,15 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.4] - 2026-06-25 — "Tighter table"
+
+### Changed
+- Tighter table margins; up to four opponents per row (extras wrap to a
+  centered second row).
+- Dealer button now renders as a "D" badge next to the player's name.
+- Winnings appear in the game-play log instead of a separate hand-over panel.
+- Hand analysis (live odds + post-hand coaching) moved into an on-demand 🎓 dialog.
+
 ## [1.1.3] - 2026-06-25 — "Bankroll graph"
 
 ### Added
@@ -94,6 +103,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.4]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.4
 [1.1.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.3
 [1.1.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.2
 [1.1.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.1
