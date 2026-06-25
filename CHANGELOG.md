@@ -4,6 +4,19 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.2.0] - 2026-06-25 — "Round table redesign"
+
+### Changed
+- Redesigned the table as an oval with opponents arranged in a ring around the
+  community cards, which now sit dead-centre and are clearly visible.
+- Tighter layout with much less empty space.
+- Moved a live game readout to the centre of the top bar (tap for the last 5
+  hands via a dialog); removed the hand counter.
+
+### Added
+- Prominent 📸 snapshot button in the top bar.
+- Icons on the Fold / Check / Call / Raise / Pot action buttons.
+
 ## [1.1.5] - 2026-06-25 — "Snapshots & longer log"
 
 ### Added
@@ -113,6 +126,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.2.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.0
 [1.1.5]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.5
 [1.1.4]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.4
 [1.1.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.3

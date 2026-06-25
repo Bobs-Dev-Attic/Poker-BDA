@@ -14,6 +14,22 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.2.0',
+    date: '2026-06-25',
+    title: 'Round table redesign',
+    highlights: [
+      'Opponents now circle the community cards',
+      'The flop is front-and-centre',
+    ],
+    changes: [
+      { type: 'changed', text: 'Redesigned the table as an oval: opponents circle the board, which now sits dead-centre and is easy to see.' },
+      { type: 'changed', text: 'Tighter layout with much less empty space.' },
+      { type: 'changed', text: 'Moved a live game readout to the centre of the top bar; tap it for the last 5 hands. Removed the hand counter.' },
+      { type: 'added', text: 'Prominent 📸 snapshot button in the top bar (in-app screenshots that work even when the device blocks them).' },
+      { type: 'added', text: 'Icons on the Fold / Check / Call / Raise / Pot buttons.' },
+    ],
+  },
+  {
     version: '1.1.5',
     date: '2026-06-25',
     title: 'Snapshots & longer log',

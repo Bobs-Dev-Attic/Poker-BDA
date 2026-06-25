@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Screen } from '../App'
 import { PlayingCard } from '../components/PlayingCard'
-import { fmt } from '../components/util'
+import { fmt, ringPositions } from '../components/util'
 import { useSettings } from '../state/settings'
 import { sfx, setSoundEnabled } from '../sound'
 import {
@@ -51,10 +51,10 @@ export function GameScreen({
   const [lastReview, setLastReview] = useState<string[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
   const [analysisOpen, setAnalysisOpen] = useState(false)
+  const [logOpen, setLogOpen] = useState(false)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const screenRef = useRef<HTMLDivElement>(null)
-  const logRef = useRef<HTMLDivElement>(null)
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
   // Per-hand tracking of the human's play, for learning metrics.
   const handFlags = useRef({ voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 })
@@ -253,12 +253,6 @@ export function GameScreen({
     else if (result === 'failed') window.alert('Could not create the snapshot on this device.')
   }
 
-  // Keep the game-play log scrolled to the latest line.
-  useEffect(() => {
-    const el = logRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [state.log])
-
   // ---- Coach analysis (human turn) ----
   const coach = useMemo(() => {
     if (!isHumanTurn(state) || state.awaitingDraw) return null
@@ -345,14 +339,19 @@ export function GameScreen({
 
   const minHand = Math.max(0, state.handNumber - 4)
   const visibleLog = state.log.filter((l) => (l.handNumber ?? state.handNumber) >= minHand)
+  const latestLog = state.log.length ? state.log[state.log.length - 1].text : 'Good luck!'
+  const opponents = state.players.map((p, i) => ({ p, i })).filter((x) => !x.p.isHuman)
+  const ring = ringPositions(opponents.length)
 
   return (
     <div className="game-screen" ref={screenRef}>
-      {/* Slim header with a menu */}
+      {/* Slim header: menu · live readout · snapshot · analysis · pot */}
       <div className="game-header" data-no-snapshot="true">
         <button className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">☰</button>
-        <div className="gh-title">Hand #{state.handNumber}</div>
-        <div className="spacer" />
+        <button className="gh-readout" onClick={() => setLogOpen(true)} title="Tap for the last 5 hands">
+          {latestLog}
+        </button>
+        <button className="icon-btn" onClick={takeSnapshot} aria-label="Save snapshot">📸</button>
         <button className="icon-btn" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
         <span className="pill">💰 {fmt(state.pot)}</span>
         {menuOpen && (
@@ -362,6 +361,7 @@ export function GameScreen({
               <button onClick={() => { setMenuOpen(false); go('home') }}>🏠 Home</button>
               <button onClick={() => { setMenuOpen(false); onRematch() }}>🎲 New Game</button>
               <button onClick={takeSnapshot}>📸 Save snapshot</button>
+              <button onClick={() => { setMenuOpen(false); setLogOpen(true) }}>📜 Hand log</button>
               <button onClick={() => { setMenuOpen(false); go('practice') }}>🎯 Practice</button>
               <button onClick={() => { setMenuOpen(false); go('learn') }}>📚 Learn</button>
               <button onClick={() => { setMenuOpen(false); go('stats') }}>📊 Stats</button>
@@ -373,30 +373,35 @@ export function GameScreen({
 
       <div className="table-wrap">
         <div className="felt">
-          <div className="opponents">
-            {state.players.map((p, i) => (p.isHuman ? null : renderSeat(p, i, false)))}
-          </div>
+          {/* Opponents circle the community cards */}
+          {opponents.map(({ p, i }, k) => (
+            <div
+              key={p.id}
+              className="ring-pos"
+              style={{ left: `${ring[k].x}%`, top: `${ring[k].y}%` }}
+            >
+              {renderSeat(p, i, false)}
+            </div>
+          ))}
 
+          {/* Community cards & pot — centre of the table */}
           <div className="table-center">
             <div className="pot-display">💰 Pot {fmt(state.pot)}</div>
             <div className="community">
-              {state.board.map((c, i) => (
-                <PlayingCard key={i} card={c} size="md" />
-              ))}
+              {state.board.length === 0
+                ? <div className="board-hint">community cards appear here</div>
+                : state.board.map((c, i) => <PlayingCard key={i} card={c} size="md" />)}
             </div>
           </div>
+
+          {/* You — bottom centre */}
+          <div className="hero-seat">{renderSeat(human, humanIndex, true)}</div>
         </div>
       </div>
 
-      {/* Your seat & cards — always visible, even at a full table */}
-      <div className="hero-strip">{renderSeat(human, humanIndex, true)}</div>
-
-      {/* Game-play log — last 5 hands, includes winnings */}
-      <div className="log" ref={logRef}>
-        {visibleLog.map((l) => (
-          <div key={l.id} className={l.kind}>{l.text}</div>
-        ))}
-      </div>
+      {logOpen && (
+        <LogDialog entries={visibleLog} onClose={() => setLogOpen(false)} />
+      )}
 
       {analysisOpen && (
         <AnalysisDialog
@@ -437,7 +442,7 @@ export function GameScreen({
               return (
                 <div className="bet-controls">
                   <div className="bet-row">
-                    <button className="btn pot-btn" onClick={() => setRaiseTo(potBet)}>Pot</button>
+                    <button className="btn pot-btn" onClick={() => setRaiseTo(potBet)}>🪙 Pot</button>
                     <div className="slider-wrap">
                       <input
                         type="range"
@@ -454,12 +459,12 @@ export function GameScreen({
               )
             })()}
             <div className="action-buttons">
-              <button className="btn btn-danger" onClick={doFold}>Fold</button>
+              <button className="btn btn-danger" onClick={doFold}><span className="bi">🚫</span>Fold</button>
               {la.canCheck ? (
-                <button className="btn" onClick={() => act({ type: 'check' })}>Check</button>
+                <button className="btn" onClick={() => act({ type: 'check' })}><span className="bi">✔️</span>Check</button>
               ) : (
                 <button className="btn" onClick={() => act({ type: 'call' })}>
-                  Call {fmt(la.callAmount)}
+                  <span className="bi">📞</span>Call {fmt(la.callAmount)}
                 </button>
               )}
               {la.canRaise && (
@@ -467,6 +472,7 @@ export function GameScreen({
                   className="btn btn-primary"
                   onClick={() => act({ type: raiseTo >= la.maxRaiseTo ? 'allin' : la.isOpeningBet ? 'bet' : 'raise', amount: raiseTo })}
                 >
+                  <span className="bi">{raiseTo >= la.maxRaiseTo ? '🔥' : '⬆️'}</span>
                   {raiseTo >= la.maxRaiseTo ? 'All-in' : la.isOpeningBet ? 'Bet' : 'Raise'} {fmt(raiseTo)}
                 </button>
               )}
@@ -474,9 +480,9 @@ export function GameScreen({
           </>
         ) : (
           <div className="action-buttons">
-            <button className="btn" disabled>Fold</button>
-            <button className="btn" disabled>Check</button>
-            <button className="btn btn-primary" disabled>Raise</button>
+            <button className="btn" disabled><span className="bi">🚫</span>Fold</button>
+            <button className="btn" disabled><span className="bi">✔️</span>Check</button>
+            <button className="btn btn-primary" disabled><span className="bi">⬆️</span>Raise</button>
           </div>
         )}
       </div>
@@ -574,6 +580,30 @@ function AnalysisDialog({
         )}
 
         <button className="btn btn-primary btn-block" style={{ marginTop: 14 }} onClick={onClose}>Close</button>
+      </div>
+    </div>
+  )
+}
+
+function LogDialog({ entries, onClose }: { entries: GameState['log']; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
+        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+          <h3 style={{ margin: 0 }}>📜 Last 5 Hands</h3>
+          <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div ref={ref} className="log-dialog-body">
+          {entries.map((l) => (
+            <div key={l.id} className={l.kind} style={{ marginBottom: 2 }}>{l.text}</div>
+          ))}
+        </div>
+        <button className="btn btn-primary btn-block" style={{ marginTop: 12 }} onClick={onClose}>Close</button>
       </div>
     </div>
   )
