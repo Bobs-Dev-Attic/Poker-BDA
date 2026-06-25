@@ -52,6 +52,39 @@ export const GAME_GUIDES: Record<VariantId, GameGuide> = {
       'Don’t pay to chase weak draws when the price is high.',
     ],
   },
+  omaha: {
+    id: 'omaha',
+    name: 'Omaha',
+    blurb: 'Like Hold’em, but four hole cards — and you must use exactly two.',
+    howToPlay: [
+      'Each player is dealt four private hole cards.',
+      'Betting and community cards proceed exactly as in Texas Hold’em (pre-flop, flop, turn, river).',
+      'At showdown you must make your best five-card hand using EXACTLY two of your hole cards plus three of the five community cards.',
+    ],
+    tips: [
+      'You can’t use one or three hole cards — always exactly two. This trips up Hold’em players.',
+      'Big draws are huge in Omaha; the nuts change often, so be ready to fold strong-looking hands.',
+      'Coordinated, “double-suited” starting hands (e.g. A-K-Q-J with two suits) play best.',
+      'Bare aces are far weaker than in Hold’em — connectedness matters more.',
+    ],
+  },
+  'short-deck': {
+    id: 'short-deck',
+    name: 'Short-Deck Hold’em',
+    blurb: 'Hold’em with the 2–5 removed (36 cards). Action-packed.',
+    howToPlay: [
+      'Played like Texas Hold’em but the deck has no 2, 3, 4 or 5 (36 cards).',
+      'Two hole cards, five community cards, four betting rounds.',
+      'A flush BEATS a full house (flushes are rarer with fewer cards).',
+      'The lowest straight is A-6-7-8-9 (the Ace plays low).',
+    ],
+    tips: [
+      'Everything connects more — straights and big pairs go up in value.',
+      'Flushes are gold here: they outrank full houses.',
+      'You’ll make and face strong hands more often, so expect bigger pots.',
+      'Suited and connected cards are even stronger than in regular Hold’em.',
+    ],
+  },
   'five-card-draw': {
     id: 'five-card-draw',
     name: 'Five-Card Draw',

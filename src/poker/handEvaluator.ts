@@ -43,16 +43,25 @@ export interface HandResult {
   name: string
 }
 
-function scoreFrom(category: HandCategory, tiebreakers: number[]): number {
-  let s = category
+// Comparable rank for a category. In short-deck, a flush beats a full house.
+function categoryRank(category: HandCategory, shortDeck: boolean): number {
+  if (!shortDeck) return category
+  if (category === HandCategory.Flush) return HandCategory.FullHouse
+  if (category === HandCategory.FullHouse) return HandCategory.Flush
+  return category
+}
+
+function scoreFrom(rank: number, tiebreakers: number[]): number {
+  let s = rank
   for (let i = 0; i < 5; i++) {
     s = s * 15 + (tiebreakers[i] ?? 0)
   }
   return s
 }
 
-// Evaluate exactly 5 cards.
-function evaluate5(cards: Card[]): HandResult {
+// Evaluate exactly 5 cards. In short-deck, the wheel is A-6-7-8-9 (A plays low)
+// and a flush outranks a full house.
+function evaluate5(cards: Card[], shortDeck = false): HandResult {
   const ranks = cards.map((c) => c.rank).sort((a, b) => b - a)
   const suits = cards.map((c) => c.suit)
 
@@ -62,20 +71,22 @@ function evaluate5(cards: Card[]): HandResult {
   const counts = new Map<Rank, number>()
   for (const r of ranks) counts.set(r, (counts.get(r) ?? 0) + 1)
 
-  // Detect straight (including wheel: A-2-3-4-5 where A counts low).
+  // Detect straight (including the low-ace wheel for the relevant deck).
   const uniqueDesc = [...new Set(ranks)].sort((a, b) => b - a)
   let straightHigh = 0
   if (uniqueDesc.length === 5) {
     if (uniqueDesc[0] - uniqueDesc[4] === 4) {
       straightHigh = uniqueDesc[0]
     } else if (
-      uniqueDesc[0] === 14 &&
-      uniqueDesc[1] === 5 &&
-      uniqueDesc[2] === 4 &&
-      uniqueDesc[3] === 3 &&
-      uniqueDesc[4] === 2
+      !shortDeck && uniqueDesc[0] === 14 &&
+      uniqueDesc[1] === 5 && uniqueDesc[2] === 4 && uniqueDesc[3] === 3 && uniqueDesc[4] === 2
     ) {
-      straightHigh = 5 // wheel
+      straightHigh = 5 // A-2-3-4-5 wheel
+    } else if (
+      shortDeck && uniqueDesc[0] === 14 &&
+      uniqueDesc[1] === 9 && uniqueDesc[2] === 8 && uniqueDesc[3] === 7 && uniqueDesc[4] === 6
+    ) {
+      straightHigh = 9 // A-6-7-8-9 short-deck wheel
     }
   }
 
@@ -121,7 +132,7 @@ function evaluate5(cards: Card[]): HandResult {
   return {
     category,
     tiebreakers,
-    score: scoreFrom(category, tiebreakers),
+    score: scoreFrom(categoryRank(category, shortDeck), tiebreakers),
     cards,
     name: describe(category, tiebreakers, straightHigh),
   }
@@ -169,14 +180,41 @@ function combinations5(cards: Card[]): Card[][] {
 }
 
 // Evaluate the best 5-card hand from 5, 6 or 7 cards.
-export function evaluateHand(cards: Card[]): HandResult {
+export function evaluateHand(cards: Card[], shortDeck = false): HandResult {
   if (cards.length < 5) {
     throw new Error(`evaluateHand needs at least 5 cards, got ${cards.length}`)
   }
   let best: HandResult | null = null
   for (const combo of combinations5(cards)) {
-    const r = evaluate5(combo)
+    const r = evaluate5(combo, shortDeck)
     if (!best || r.score > best.score) best = r
+  }
+  return best!
+}
+
+function kCombos<T>(arr: T[], k: number): T[][] {
+  const res: T[][] = []
+  const rec = (start: number, combo: T[]) => {
+    if (combo.length === k) { res.push(combo.slice()); return }
+    for (let i = start; i < arr.length; i++) {
+      combo.push(arr[i])
+      rec(i + 1, combo)
+      combo.pop()
+    }
+  }
+  rec(0, [])
+  return res
+}
+
+// Omaha: the best hand must use EXACTLY two hole cards and three board cards.
+export function evaluateOmaha(hole: Card[], board: Card[], shortDeck = false): HandResult {
+  if (board.length < 3) throw new Error('evaluateOmaha needs at least 3 board cards')
+  let best: HandResult | null = null
+  for (const h of kCombos(hole, 2)) {
+    for (const b of kCombos(board, 3)) {
+      const r = evaluate5([...h, ...b], shortDeck)
+      if (!best || r.score > best.score) best = r
+    }
   }
   return best!
 }

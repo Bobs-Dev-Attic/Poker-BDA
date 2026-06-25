@@ -13,7 +13,8 @@ the couch, or offline.
 
 ## Features
 
-- **Games:** Texas Hold'em and Five-Card Draw (engine built to add more).
+- **Games:** Texas Hold'em, Omaha, Short-Deck Hold'em, and Five-Card Draw
+  (engine built to add more).
 - **AI opponents:** six personas × five skill tiers, each with its own style,
   bet sizing, bluffing tendency, and table chatter.
   - Personas: **Rocky** (Rock), **Max** (Maniac), **Stan** (Calling Station),

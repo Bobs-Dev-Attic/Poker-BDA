@@ -4,9 +4,19 @@
 
 import { makeDeck, cardId } from '../cards'
 import type { Card } from '../cards'
-import { evaluateHand, HandCategory } from '../handEvaluator'
-import type { GameState, Player, Action } from '../types'
+import { evaluateHand, evaluateOmaha, HandCategory } from '../handEvaluator'
+import type { GameState, Player, Action, VariantId } from '../types'
 import { PERSONAS, SKILLS } from './personas'
+
+interface VariantRules { community: boolean; shortDeck: boolean; omaha: boolean; holeCards: number }
+function rulesFor(variant: VariantId): VariantRules {
+  switch (variant) {
+    case 'omaha': return { community: true, shortDeck: false, omaha: true, holeCards: 4 }
+    case 'short-deck': return { community: true, shortDeck: true, omaha: false, holeCards: 2 }
+    case 'five-card-draw': return { community: false, shortDeck: false, omaha: false, holeCards: 5 }
+    default: return { community: true, shortDeck: false, omaha: false, holeCards: 2 }
+  }
+}
 
 function clamp(x: number, lo = 0, hi = 1): number {
   return Math.max(lo, Math.min(hi, x))
@@ -16,9 +26,9 @@ function clamp(x: number, lo = 0, hi = 1): number {
 // Equity / hand strength
 // ---------------------------------------------------------------------------
 
-function remainingDeck(known: Card[]): Card[] {
+function remainingDeck(known: Card[], shortDeck = false): Card[] {
   const used = new Set(known.map(cardId))
-  return makeDeck().filter((c) => !used.has(cardId(c)))
+  return makeDeck(shortDeck).filter((c) => !used.has(cardId(c)))
 }
 
 function sample<T>(arr: T[], n: number, rng: () => number): T[] {
@@ -34,30 +44,35 @@ function sample<T>(arr: T[], n: number, rng: () => number): T[] {
   return out
 }
 
-// Monte-Carlo equity for Hold'em (works pre- and post-flop).
-function holdemEquity(
+// Monte-Carlo equity for any community game (Hold'em / Omaha / short-deck),
+// pre- and post-flop.
+function communityEquity(
   hole: Card[],
   board: Card[],
   opponents: number,
   rng: () => number,
+  rules: VariantRules,
 ): number {
   if (opponents <= 0) return 1
-  const deck = remainingDeck([...hole, ...board])
+  const deck = remainingDeck([...hole, ...board], rules.shortDeck)
   const boardNeeded = 5 - board.length
   const iters = Math.max(40, Math.round(260 / opponents))
+  const handScore = (h: Card[], full: Card[]) =>
+    rules.omaha ? evaluateOmaha(h, full, rules.shortDeck).score : evaluateHand([...h, ...full], rules.shortDeck).score
   let score = 0
   for (let it = 0; it < iters; it++) {
-    const draw = sample(deck, opponents * 2 + boardNeeded, rng)
+    const draw = sample(deck, opponents * rules.holeCards + boardNeeded, rng)
     let di = 0
     const fullBoard = [...board]
     for (let b = 0; b < boardNeeded; b++) fullBoard.push(draw[di++])
-    const mine = evaluateHand([...hole, ...fullBoard]).score
+    const mine = handScore(hole, fullBoard)
     let best = mine
     let tiesAtBest = 1
     let iLost = false
     for (let o = 0; o < opponents; o++) {
-      const oppHole = [draw[di++], draw[di++]]
-      const oppScore = evaluateHand([...oppHole, ...fullBoard]).score
+      const oppHole: Card[] = []
+      for (let k = 0; k < rules.holeCards; k++) oppHole.push(draw[di++])
+      const oppScore = handScore(oppHole, fullBoard)
       if (oppScore > best) {
         best = oppScore
         iLost = true
@@ -99,8 +114,9 @@ function opponentsInHand(state: GameState, seat: number): number {
 export function estimateStrength(state: GameState, seat: number, rng: () => number): number {
   const p = state.players[seat]
   const opp = opponentsInHand(state, seat)
-  if (state.variant === 'holdem') {
-    return holdemEquity(p.hole, state.board, opp, rng)
+  const rules = rulesFor(state.variant)
+  if (rules.community) {
+    return communityEquity(p.hole, state.board, opp, rng, rules)
   }
   return madeHandStrength(p.hole)
 }

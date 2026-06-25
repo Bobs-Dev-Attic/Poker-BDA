@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluateHand, HandCategory, compareHands } from './handEvaluator'
+import { evaluateHand, evaluateOmaha, HandCategory, compareHands } from './handEvaluator'
 import type { Card, Rank, Suit } from './cards'
 
 function c(spec: string): Card {
@@ -60,5 +60,41 @@ describe('compareHands', () => {
     const a = evaluateHand(hand('14c', '14d', '13h', '5s', '2c'))
     const b = evaluateHand(hand('14h', '14s', '13d', '5c', '2d'))
     expect(compareHands(a, b)).toBe(0)
+  })
+})
+
+describe('short-deck rules', () => {
+  it('ranks a flush above a full house', () => {
+    const flush = evaluateHand(hand('14h', '11h', '9h', '8h', '6h'), true)
+    const boat = evaluateHand(hand('13c', '13d', '13h', '7s', '7c'), true)
+    expect(compareHands(flush, boat)).toBeGreaterThan(0)
+    // In a standard deck the full house wins.
+    const flushN = evaluateHand(hand('14h', '11h', '9h', '8h', '6h'))
+    const boatN = evaluateHand(hand('13c', '13d', '13h', '7s', '7c'))
+    expect(compareHands(flushN, boatN)).toBeLessThan(0)
+  })
+
+  it('recognizes the A-6-7-8-9 wheel as a straight', () => {
+    const r = evaluateHand(hand('14c', '9d', '8h', '7s', '6c'), true)
+    expect(r.category).toBe(HandCategory.Straight)
+    expect(r.tiebreakers[0]).toBe(9) // nine-high
+  })
+})
+
+describe('Omaha (exactly two hole cards)', () => {
+  it('cannot make a flush with only one suited hole card', () => {
+    // Board has four hearts; hero holds one heart + offsuit. Using exactly two
+    // hole cards, a flush is impossible — best is a pair, not a flush.
+    const hole = hand('14h', '2c', '3d', '4s')
+    const board = hand('13h', '9h', '5h', '2h', '7s')
+    const r = evaluateOmaha(hole, board)
+    expect(r.category).not.toBe(HandCategory.Flush)
+  })
+
+  it('makes a flush when two hole cards share the board suit', () => {
+    const hole = hand('14h', '10h', '3d', '4s')
+    const board = hand('13h', '9h', '5h', '2c', '7s')
+    const r = evaluateOmaha(hole, board)
+    expect(r.category).toBe(HandCategory.Flush)
   })
 })

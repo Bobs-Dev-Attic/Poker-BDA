@@ -4,6 +4,16 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.4.0] - 2026-06-25 — "Two new games"
+
+### Added
+- **Omaha** — four hole cards; the best hand must use exactly two of them plus
+  three board cards (enforced by a dedicated evaluator).
+- **Short-Deck Hold'em** — 36-card deck (no 2–5); a flush beats a full house and
+  A-6-7-8-9 is the low straight.
+- Both variants use the existing AI personas, Monte-Carlo coaching/odds, and
+  analysis; added Learn Center guides for each.
+
 ## [1.3.3] - 2026-06-25 — "Bubbles under the board"
 
 ### Changed
@@ -180,6 +190,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.4.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.4.0
 [1.3.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.3
 [1.3.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.2
 [1.3.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.1

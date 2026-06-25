@@ -49,10 +49,12 @@ export function isRed(c: Card): boolean {
   return c.suit === 'd' || c.suit === 'h'
 }
 
-export function makeDeck(): Card[] {
+// Build a 52-card deck, or a 36-card short deck (no 2–5) when shortDeck is set.
+export function makeDeck(shortDeck = false): Card[] {
+  const ranks = shortDeck ? RANKS.filter((r) => r >= 6) : RANKS
   const deck: Card[] = []
   for (const suit of SUITS) {
-    for (const rank of RANKS) {
+    for (const rank of ranks) {
       deck.push({ rank, suit })
     }
   }

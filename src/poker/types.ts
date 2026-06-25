@@ -2,7 +2,7 @@ import type { Card } from './cards'
 import type { HandResult } from './handEvaluator'
 import type { SkillLevel, PersonaId } from './ai/personas'
 
-export type VariantId = 'holdem' | 'five-card-draw'
+export type VariantId = 'holdem' | 'omaha' | 'short-deck' | 'five-card-draw'
 
 export type Street =
   // Hold'em streets

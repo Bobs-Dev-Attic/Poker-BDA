@@ -8,7 +8,7 @@ import type { PersonaId, SkillLevel } from '../poker/ai/personas'
 import type { TableConfig, VariantId, PlayerConfig } from '../poker/types'
 import { GAME_GUIDES } from '../data/learn'
 
-const VARIANTS: VariantId[] = ['holdem', 'five-card-draw']
+const VARIANTS: VariantId[] = ['holdem', 'omaha', 'short-deck', 'five-card-draw']
 const PERSONA_IDS = Object.keys(PERSONAS) as PersonaId[]
 const SKILL_IDS = Object.keys(SKILLS) as SkillLevel[]
 const STACK_OPTIONS = [500, 1000, 2000, 5000]

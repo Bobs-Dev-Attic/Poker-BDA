@@ -12,11 +12,11 @@ import {
   applyDraw,
   legalActions,
   isHumanTurn,
+  evaluateForVariant,
 } from '../poker/engine'
 import { chooseAction, estimateStrength } from '../poker/ai/ai'
 import type { GameState, TableConfig, Action, Player } from '../poker/types'
 import { PERSONAS, pickChatter } from '../poker/ai/personas'
-import { evaluateHand } from '../poker/handEvaluator'
 import { loadGame, saveGame, clearGame } from '../state/savedGame'
 import { reviewHand } from '../poker/coach'
 import type { Decision } from '../poker/coach'
@@ -361,12 +361,10 @@ export function GameScreen({
     const strength = estimateStrength(state, humanIndex, rng)
     const la = legalActions(state)
     const potOdds = la.callAmount > 0 ? la.callAmount / (state.pot + la.callAmount) : 0
-    let hint: string
-    if (state.variant === 'holdem' && state.board.length >= 3) {
-      const made = evaluateHand([...human.hole, ...state.board])
+    let hint = ''
+    if (state.board.length >= 3) {
+      const made = evaluateForVariant(state.variant, human.hole, state.board)
       hint = `You have ${made.name}. `
-    } else {
-      hint = ''
     }
     if (la.callAmount > 0) {
       hint += strength > potOdds + 0.08

@@ -14,6 +14,18 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.4.0',
+    date: '2026-06-25',
+    title: 'Two new games',
+    highlights: ['Omaha and Short-Deck Hold’em added'],
+    changes: [
+      { type: 'added', text: 'Omaha — four hole cards; your hand must use exactly two of them plus three from the board.' },
+      { type: 'added', text: 'Short-Deck Hold’em — 36-card deck (no 2–5), where a flush beats a full house and A-6-7-8-9 is a straight.' },
+      { type: 'added', text: 'Both play with the same AI personas, coaching, odds, and analysis as Hold’em.' },
+      { type: 'added', text: 'Learn Center guides for both new games.' },
+    ],
+  },
+  {
     version: '1.3.3',
     date: '2026-06-25',
     title: 'Bubbles under the board',

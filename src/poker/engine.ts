@@ -4,7 +4,8 @@
 
 import { makeDeck, shuffle, cardLabel } from './cards'
 import type { Card } from './cards'
-import { evaluateHand, compareHands } from './handEvaluator'
+import { evaluateHand, evaluateOmaha, compareHands } from './handEvaluator'
+import type { HandResult } from './handEvaluator'
 import type {
   GameState,
   Player,
@@ -24,19 +25,43 @@ interface VariantSpec {
   // Ordered betting streets (excluding showdown).
   bettingStreets: Street[]
   isDraw: boolean
+  // Community-card game (uses a shared board).
+  community: boolean
+  // 36-card short deck (no 2–5), with flush > full house.
+  shortDeck: boolean
+  // Omaha rule: best hand must use exactly two hole cards.
+  omaha: boolean
 }
 
 export const VARIANTS: Record<VariantId, VariantSpec> = {
   holdem: {
     holeCards: 2,
     bettingStreets: ['preflop', 'flop', 'turn', 'river'],
-    isDraw: false,
+    isDraw: false, community: true, shortDeck: false, omaha: false,
+  },
+  omaha: {
+    holeCards: 4,
+    bettingStreets: ['preflop', 'flop', 'turn', 'river'],
+    isDraw: false, community: true, shortDeck: false, omaha: true,
+  },
+  'short-deck': {
+    holeCards: 2,
+    bettingStreets: ['preflop', 'flop', 'turn', 'river'],
+    isDraw: false, community: true, shortDeck: true, omaha: false,
   },
   'five-card-draw': {
     holeCards: 5,
     bettingStreets: ['predraw', 'postdraw'],
-    isDraw: true,
+    isDraw: true, community: false, shortDeck: false, omaha: false,
   },
+}
+
+// Evaluate a player's hand for any variant.
+export function evaluateForVariant(variant: VariantId, hole: Card[], board: Card[]): HandResult {
+  const spec = VARIANTS[variant]
+  if (spec.omaha) return evaluateOmaha(hole, board, spec.shortDeck)
+  if (spec.community) return evaluateHand([...hole, ...board], spec.shortDeck)
+  return evaluateHand(hole, spec.shortDeck) // draw: 5 hole cards
 }
 
 // ---------------------------------------------------------------------------
@@ -168,7 +193,7 @@ export function startHand(prev: GameState, rng: () => number = Math.random): Gam
   state.dealer = nextSeat(state, state.dealer, (p) => !p.busted)
 
   const spec = VARIANTS[state.variant]
-  state.deck = shuffle(makeDeck(), rng)
+  state.deck = shuffle(makeDeck(spec.shortDeck), rng)
 
   // Antes.
   if (state.ante > 0) {
@@ -418,7 +443,7 @@ function progressStreet(state: GameState, rng: () => number): GameState {
 }
 
 function dealStreet(state: GameState, street: Street) {
-  if (state.variant === 'holdem') {
+  if (VARIANTS[state.variant].community) {
     if (street === 'flop') {
       state.board.push(state.deck.pop()!, state.deck.pop()!, state.deck.pop()!)
       log(state, `Flop: ${state.board.map(cardLabel).join(' ')}`, 'system')
@@ -528,8 +553,7 @@ function resolveShowdown(state: GameState): GameState {
 
   // Evaluate every contender's best hand.
   for (const p of contenders) {
-    const cards = state.variant === 'holdem' ? [...p.hole, ...state.board] : [...p.hole]
-    p.result = evaluateHand(cards)
+    p.result = evaluateForVariant(state.variant, p.hole, state.board)
   }
 
   // Build side pots from committed amounts across ALL players (folded chips

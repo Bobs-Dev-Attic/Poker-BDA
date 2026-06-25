@@ -68,6 +68,22 @@ describe('engine simulation', () => {
     }
   })
 
+  it('plays Omaha to completion with chips conserved', () => {
+    for (const n of [2, 4]) {
+      for (const seed of [11, 808]) {
+        simulate('omaha', n, seed)
+      }
+    }
+  })
+
+  it('plays Short-Deck Hold’em to completion with chips conserved', () => {
+    for (const n of [2, 4]) {
+      for (const seed of [3, 99]) {
+        simulate('short-deck', n, seed)
+      }
+    }
+  })
+
   it('eventually crowns a single winner', () => {
     const final = simulate('holdem', 3, 555)
     const alive = final.players.filter((p) => p.chips > 0)
