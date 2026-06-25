@@ -322,7 +322,46 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
+
+/* ----- Slide-out side panels ----- */
+.side-backdrop { position: absolute; inset: 0; z-index: 55; background: rgba(0,0,0,0.45); }
+.side-panel {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: min(85%, 340px);
+  z-index: 60;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease;
+}
+.side-panel.left { left: 0; border-right: 1px solid var(--border); border-radius: 0 16px 16px 0; transform: translateX(-101%); }
+.side-panel.right { right: 0; border-left: 1px solid var(--border); border-radius: 16px 0 0 16px; transform: translateX(101%); }
+.side-panel.left.open, .side-panel.right.open { transform: translateX(0); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.panel-head h3 { margin: 0; font-size: 17px; }
+.panel-body { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.45; color: var(--text-dim); }
+.panel-body .showdown { color: var(--success); }
+.panel-body .chat { color: var(--accent); font-style: italic; }
+
+.edge-handle {
+  position: absolute;
+  top: 38%;
+  z-index: 30;
+  width: 24px; height: 60px;
+  display: grid; place-items: center;
+  font-size: 15px;
+  background: var(--grad-surface-2);
+  border: 1px solid var(--border);
+  opacity: 0.8;
+}
+.edge-handle.left { left: 0; border-left: none; border-radius: 0 10px 10px 0; }
+.edge-handle.right { right: 0; border-right: none; border-radius: 10px 0 0 10px; }
 /* Slim in-game header with a menu */
 .game-header {
   display: flex;
@@ -572,8 +611,40 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 .bet-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .bet-row { display: flex; align-items: center; gap: 8px; }
 .bet-row .pot-btn { flex-shrink: 0; padding: 12px 16px; }
-.slider-wrap { flex: 1; position: relative; display: flex; align-items: center; min-width: 0; }
-.slider-wrap input[type='range'] { width: 100%; accent-color: var(--accent); }
+.slider-wrap { flex: 1; position: relative; display: flex; align-items: center; min-width: 0; height: 30px; }
+.slider-wrap input[type='range'] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 30px;
+  margin: 0;
+}
+.slider-wrap input[type='range']::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, transparent), var(--surface-2));
+}
+.slider-wrap input[type='range']::-moz-range-track { height: 6px; border-radius: 3px; background: var(--surface-2); }
+/* Hide the native thumb but keep its hit area for dragging. */
+.slider-wrap input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -12px; opacity: 0; }
+.slider-wrap input[type='range']::-moz-range-thumb { width: 30px; height: 30px; opacity: 0; border: none; }
+/* The visible knob: a poker chip with a $. */
+.slider-knob {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--grad-accent);
+  color: var(--accent-contrast);
+  border: 2px solid color-mix(in srgb, var(--accent), #fff 35%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  font-weight: 900;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
 .bet-amount {
   min-width: 72px;
   text-align: center;

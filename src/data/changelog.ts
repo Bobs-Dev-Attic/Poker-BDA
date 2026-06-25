@@ -14,6 +14,21 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.3.0',
+    date: '2026-06-25',
+    title: 'Slide-out panels',
+    highlights: [
+      'Game-play history slides out from the left',
+      'Analysis & advice slide out from the right',
+    ],
+    changes: [
+      { type: 'changed', text: 'Game-play history is now a slide-out panel on the left (tap the 📜 edge tab or the readout).' },
+      { type: 'changed', text: 'Hand analysis, most-likely hands, and advice are now a slide-out panel on the right (🎓 edge tab).' },
+      { type: 'changed', text: 'Cleaned the top bar to just the menu and a live readout — removed the icons and the pot amount.' },
+      { type: 'changed', text: 'The bet slider handle is now a gold $ chip.' },
+    ],
+  },
+  {
     version: '1.2.3',
     date: '2026-06-25',
     title: 'Smarter analysis & table talk',

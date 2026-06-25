@@ -24,8 +24,6 @@ import { pushBankrollDelta } from '../state/bankroll'
 import { shareSnapshot } from '../snapshot'
 import { commentOnAction, adviceLine } from '../poker/commentary'
 import { handPotential } from '../poker/equity'
-import type { Card } from '../poker/cards'
-import type { VariantId } from '../poker/types'
 
 const rng = Math.random
 
@@ -55,10 +53,12 @@ export function GameScreen({
   const [lastReview, setLastReview] = useState<string[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
   const [analysisOpen, setAnalysisOpen] = useState(false)
-  const [logOpen, setLogOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const screenRef = useRef<HTMLDivElement>(null)
+  const historyRef = useRef<HTMLDivElement>(null)
+  const analysisRef = useRef<HTMLDivElement>(null)
   const extraLogId = useRef(-1)
   const advisedKey = useRef('')
 
@@ -135,6 +135,14 @@ export function GameScreen({
     appendLog('advice', adviceLine(strength, potOdds, la.callAmount > 0))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.toActIndex, state.handNumber, state.street, state.awaitingDraw, state.handComplete, settings.showCommentary])
+
+  // Keep the slide-out panels scrolled to their latest entry.
+  useEffect(() => {
+    if (historyOpen && historyRef.current) historyRef.current.scrollTop = historyRef.current.scrollHeight
+  }, [historyOpen, state.log])
+  useEffect(() => {
+    if (analysisOpen && analysisRef.current) analysisRef.current.scrollTop = analysisRef.current.scrollHeight
+  }, [analysisOpen, state.log])
 
   // ---- Record stats once per completed hand ----
   useEffect(() => {
@@ -374,22 +382,30 @@ export function GameScreen({
 
   const minHand = Math.max(0, state.handNumber - 4)
   const visibleLog = state.log.filter((l) => (l.handNumber ?? state.handNumber) >= minHand)
-  const latestLog = state.log.length ? state.log[state.log.length - 1].text : 'Good luck!'
+  const historyLog = visibleLog.filter((l) => l.kind !== 'commentary' && l.kind !== 'advice')
+  const analysisFeed = visibleLog.filter((l) => l.kind === 'commentary' || l.kind === 'advice')
+  const latestLog = historyLog.length ? historyLog[historyLog.length - 1].text : 'Good luck!'
   const opponents = state.players.map((p, i) => ({ p, i })).filter((x) => !x.p.isHuman)
   const ring = ringPositions(opponents.length)
 
+  // Most likely finishing hands — only computed while the analysis panel is open.
+  const potential = useMemo(() => {
+    if (
+      !analysisOpen || !settings.showHandPotential || state.variant !== 'holdem' ||
+      human.hole.length !== 2 || state.board.length >= 5 || state.handComplete
+    ) return []
+    return handPotential(human.hole, state.board).slice(0, 3)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analysisOpen, state.handNumber, state.street, state.board.length])
+
   return (
     <div className="game-screen" ref={screenRef}>
-      {/* Slim header: menu · live readout · snapshot · analysis · pot */}
+      {/* Slim header: menu · live readout */}
       <div className="game-header" data-no-snapshot="true">
         <button className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">☰</button>
-        <button className="gh-readout" onClick={() => setLogOpen(true)} title="Tap for the last 5 hands">
+        <button className="gh-readout" onClick={() => setHistoryOpen(true)} title="Tap for the last 5 hands">
           {latestLog}
         </button>
-        <button className="icon-btn" onClick={() => setLogOpen(true)} aria-label="Hand history">📜</button>
-        <button className="icon-btn" onClick={takeSnapshot} aria-label="Save snapshot">📸</button>
-        <button className="icon-btn" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
-        <span className="pill">💰 {fmt(state.pot)}</span>
         {menuOpen && (
           <>
             <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
@@ -397,7 +413,8 @@ export function GameScreen({
               <button onClick={() => { setMenuOpen(false); go('home') }}>🏠 Home</button>
               <button onClick={() => { setMenuOpen(false); onRematch() }}>🎲 New Game</button>
               <button onClick={takeSnapshot}>📸 Save snapshot</button>
-              <button onClick={() => { setMenuOpen(false); setLogOpen(true) }}>📜 Hand log</button>
+              <button onClick={() => { setMenuOpen(false); setHistoryOpen(true) }}>📜 Hand history</button>
+              <button onClick={() => { setMenuOpen(false); setAnalysisOpen(true) }}>🎓 Analysis</button>
               <button onClick={() => { setMenuOpen(false); go('practice') }}>🎯 Practice</button>
               <button onClick={() => { setMenuOpen(false); go('learn') }}>📚 Learn</button>
               <button onClick={() => { setMenuOpen(false); go('stats') }}>📊 Stats</button>
@@ -440,24 +457,66 @@ export function GameScreen({
         </div>
       </div>
 
-      {logOpen && (
-        <LogDialog entries={visibleLog} onClose={() => setLogOpen(false)} />
+      {/* Edge handles to reveal the slide-out panels */}
+      <button className="edge-handle left" data-no-snapshot="true" onClick={() => setHistoryOpen(true)} aria-label="Game-play history">📜</button>
+      <button className="edge-handle right" data-no-snapshot="true" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
+
+      {(historyOpen || analysisOpen) && (
+        <div className="side-backdrop" data-no-snapshot="true" onClick={() => { setHistoryOpen(false); setAnalysisOpen(false) }} />
       )}
 
-      {analysisOpen && (
-        <AnalysisDialog
-          state={state}
-          coach={coach}
-          humanTurn={humanTurn}
-          review={lastReview}
-          log={visibleLog}
-          hole={human.hole}
-          board={state.board}
-          variant={state.variant}
-          showPotential={settings.showHandPotential}
-          onClose={() => setAnalysisOpen(false)}
-        />
-      )}
+      {/* Left: game-play history */}
+      <div className={`side-panel left ${historyOpen ? 'open' : ''}`} data-no-snapshot="true">
+        <div className="panel-head">
+          <h3>📜 Last 5 Hands</h3>
+          <button className="icon-btn" onClick={() => setHistoryOpen(false)} aria-label="Close">✕</button>
+        </div>
+        <div className="panel-body" ref={historyRef}>
+          {historyLog.length === 0
+            ? <div className="small muted">No actions yet.</div>
+            : historyLog.map((l) => <div key={l.id} className={l.kind} style={{ marginBottom: 3 }}>{l.text}</div>)}
+        </div>
+      </div>
+
+      {/* Right: hand analysis & advice */}
+      <div className={`side-panel right ${analysisOpen ? 'open' : ''}`} data-no-snapshot="true">
+        <div className="panel-head">
+          <h3>🎓 Analysis</h3>
+          <button className="icon-btn" onClick={() => setAnalysisOpen(false)} aria-label="Close">✕</button>
+        </div>
+        <div className="panel-body" ref={analysisRef}>
+          {humanTurn && coach ? (
+            <>
+              <div className="small" style={{ marginBottom: 6 }}>{coach.hint}</div>
+              <div className="row" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontWeight: 700 }}>~{Math.round(coach.strength * 100)}% to win</span>
+                {coach.potOdds > 0 && <span className="small muted">Pot odds {Math.round(coach.potOdds * 100)}%</span>}
+              </div>
+            </>
+          ) : state.handComplete && lastReview.length > 0 ? (
+            lastReview.map((r, i) => <div key={i} className="small" style={{ marginBottom: 6 }}>🎓 {r}</div>)
+          ) : (
+            <div className="small muted">Live odds show on your turn; a coach review appears after each hand.</div>
+          )}
+
+          {potential.length > 0 && (
+            <>
+              <div className="section-title" style={{ margin: '12px 0 4px' }}>Most likely hands</div>
+              {potential.map((h) => (
+                <div className="potential-row" key={h.category}>
+                  <span>{h.name}</span>
+                  <span className="potential-pct">{Math.round(h.pct * 100)}%</span>
+                </div>
+              ))}
+            </>
+          )}
+
+          <div className="section-title" style={{ margin: '12px 0 4px' }}>Reads & advice</div>
+          {analysisFeed.length === 0
+            ? <div className="small muted">Reads on opponents and advice will appear here as you play.</div>
+            : analysisFeed.map((l) => <div key={l.id} className={l.kind} style={{ marginBottom: 4 }}>{l.text}</div>)}
+        </div>
+      </div>
 
       {/* Action area */}
       <div className="action-bar">
@@ -485,6 +544,7 @@ export function GameScreen({
               const max = la.maxRaiseTo
               const clamp = (v: number) => Math.min(max, Math.max(min, v))
               const potBet = clamp(state.currentBet + state.pot)
+              const knobPct = max > min ? ((raiseTo - min) / (max - min)) * 100 : 0
               return (
                 <div className="bet-controls">
                   <div className="bet-row">
@@ -498,6 +558,7 @@ export function GameScreen({
                         value={raiseTo}
                         onChange={(e) => setRaiseTo(Number(e.target.value))}
                       />
+                      <span className="slider-knob" style={{ left: `${knobPct}%` }} aria-hidden>$</span>
                     </div>
                     <span className="bet-amount">{fmt(raiseTo)}</span>
                   </div>
@@ -578,119 +639,6 @@ function HandOverPanel({
     <div className="action-buttons">
       <button className="btn" onClick={onAnalysis}>🎓 Analysis</button>
       <button className="btn btn-primary" onClick={onNext}>Next Hand →</button>
-    </div>
-  )
-}
-
-function AnalysisDialog({
-  state,
-  coach,
-  humanTurn,
-  review,
-  log,
-  hole,
-  board,
-  variant,
-  showPotential,
-  onClose,
-}: {
-  state: GameState
-  coach: { strength: number; potOdds: number; hint: string } | null
-  humanTurn: boolean
-  review: string[]
-  log: GameState['log']
-  hole: Card[]
-  board: Card[]
-  variant: VariantId
-  showPotential: boolean
-  onClose: () => void
-}) {
-  const histRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = histRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [])
-
-  // Most likely finishing hands (computed once when the dialog opens).
-  const potential = useMemo(() => {
-    if (!showPotential || variant !== 'holdem' || hole.length !== 2 || board.length >= 5 || state.handComplete) {
-      return []
-    }
-    return handPotential(hole, board).slice(0, 3)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
-        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>🎓 Hand Analysis</h3>
-          <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
-        </div>
-
-        {humanTurn && coach ? (
-          <>
-            <div className="small" style={{ marginBottom: 6 }}>{coach.hint}</div>
-            <div className="row" style={{ justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 700 }}>~{Math.round(coach.strength * 100)}% to win</span>
-              {coach.potOdds > 0 && <span className="small muted">Pot odds {Math.round(coach.potOdds * 100)}%</span>}
-            </div>
-          </>
-        ) : state.handComplete && review.length > 0 ? (
-          <div>
-            {review.map((r, i) => (
-              <div key={i} className="small" style={{ marginBottom: 6 }}>🎓 {r}</div>
-            ))}
-          </div>
-        ) : (
-          <div className="small muted">Open this on your turn for live odds, or after a hand for a coach review.</div>
-        )}
-
-        {potential.length > 0 && (
-          <>
-            <div className="section-title" style={{ margin: '14px 0 6px' }}>Most likely hands</div>
-            {potential.map((h) => (
-              <div className="potential-row" key={h.category}>
-                <span>{h.name}</span>
-                <span className="potential-pct">{Math.round(h.pct * 100)}%</span>
-              </div>
-            ))}
-          </>
-        )}
-
-        <div className="section-title" style={{ margin: '14px 0 6px' }}>Game-play history</div>
-        <div ref={histRef} className="log-dialog-body" style={{ maxHeight: '28vh' }}>
-          {log.length === 0
-            ? <div className="small muted">No actions yet.</div>
-            : log.map((l) => <div key={l.id} className={l.kind} style={{ marginBottom: 2 }}>{l.text}</div>)}
-        </div>
-
-        <button className="btn btn-primary btn-block" style={{ marginTop: 14 }} onClick={onClose}>Close</button>
-      </div>
-    </div>
-  )
-}
-
-function LogDialog({ entries, onClose }: { entries: GameState['log']; onClose: () => void }) {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [])
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
-        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>📜 Last 5 Hands</h3>
-          <button className="icon-btn" onClick={onClose} aria-label="Close">✕</button>
-        </div>
-        <div ref={ref} className="log-dialog-body">
-          {entries.map((l) => (
-            <div key={l.id} className={l.kind} style={{ marginBottom: 2 }}>{l.text}</div>
-          ))}
-        </div>
-        <button className="btn btn-primary btn-block" style={{ marginTop: 12 }} onClick={onClose}>Close</button>
-      </div>
     </div>
   )
 }
