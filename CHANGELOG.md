@@ -4,6 +4,13 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.2.1] - 2026-06-25 — "Odds at a glance"
+
+### Added
+- Pot odds (% to call) shown next to the pot in the centre of the table.
+- Your win % shown next to your chip count on your turn.
+- Settings → "Odds on table" toggle to show/hide these.
+
 ## [1.2.0] - 2026-06-25 — "Round table redesign"
 
 ### Changed
@@ -126,6 +133,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.2.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.1
 [1.2.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.0
 [1.1.5]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.5
 [1.1.4]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.4

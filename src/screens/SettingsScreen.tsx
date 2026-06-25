@@ -111,6 +111,10 @@ export function SettingsScreen({ go }: { go: (s: Screen) => void }) {
           <Toggle on={settings.coachMode} onChange={(v) => setSettings({ coachMode: v })} />
         </div>
         <div className="setting-row">
+          <div><div className="label">Odds on table</div><div className="desc">Show pot odds by the pot and your win % by your chips.</div></div>
+          <Toggle on={settings.showTableOdds} onChange={(v) => setSettings({ showTableOdds: v })} />
+        </div>
+        <div className="setting-row">
           <div><div className="label">Confirm fold</div><div className="desc">Ask before folding when you could check.</div></div>
           <Toggle on={settings.confirmFold} onChange={(v) => setSettings({ confirmFold: v })} />
         </div>

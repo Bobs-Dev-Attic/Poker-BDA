@@ -29,7 +29,7 @@ export interface Settings {
   animations: boolean
   sound: boolean
   coachMode: boolean // show strength/odds hints on your turn
-  showOddsAlways: boolean
+  showTableOdds: boolean // show pot odds & win % directly on the table
   confirmFold: boolean
   autoMuckLosers: boolean
 
@@ -52,7 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
   animations: true,
   sound: false,
   coachMode: true,
-  showOddsAlways: false,
+  showTableOdds: true,
   confirmFold: false,
   autoMuckLosers: true,
 

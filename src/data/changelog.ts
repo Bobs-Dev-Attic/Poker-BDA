@@ -14,6 +14,17 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.2.1',
+    date: '2026-06-25',
+    title: 'Odds at a glance',
+    highlights: ['See your win % and the pot odds right on the table'],
+    changes: [
+      { type: 'added', text: 'Pot odds (% to call) shown next to the pot in the centre of the table.' },
+      { type: 'added', text: 'Your win % shown next to your chip count on your turn.' },
+      { type: 'added', text: 'Settings → “Odds on table” toggle to turn these on or off.' },
+    ],
+  },
+  {
     version: '1.2.0',
     date: '2026-06-25',
     title: 'Round table redesign',

@@ -544,6 +544,7 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   padding: 8px 14px;
 }
 .bi { margin-right: 5px; font-size: 0.95em; }
+.odds-tag { color: #fff; font-weight: 700; opacity: 0.92; }
 
 /* ----- Action bar ----- */
 .action-bar {

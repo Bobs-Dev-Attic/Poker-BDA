@@ -310,7 +310,12 @@ export function GameScreen({
               <span className="nm-text">{p.name}</span>
               {state.dealer === i && <span className="dealer-chip" title="Dealer">D</span>}
             </div>
-            <div className="ch">{fmt(p.chips)}{p.allIn ? ' · ALL-IN' : ''}</div>
+            <div className="ch">
+              {fmt(p.chips)}{p.allIn ? ' · ALL-IN' : ''}
+              {hero && settings.showTableOdds && humanTurn && coach && (
+                <span className="odds-tag"> · {Math.round(coach.strength * 100)}% win</span>
+              )}
+            </div>
           </div>
         </div>
         {p.lastAction && !state.handComplete && <div className="last-action">{p.lastAction}</div>}
@@ -386,7 +391,12 @@ export function GameScreen({
 
           {/* Community cards & pot — centre of the table */}
           <div className="table-center">
-            <div className="pot-display">💰 Pot {fmt(state.pot)}</div>
+            <div className="pot-display">
+              💰 Pot {fmt(state.pot)}
+              {settings.showTableOdds && humanTurn && coach && coach.potOdds > 0 && (
+                <span className="odds-tag"> · {Math.round(coach.potOdds * 100)}% to call</span>
+              )}
+            </div>
             <div className="community">
               {state.board.length === 0
                 ? <div className="board-hint">community cards appear here</div>
