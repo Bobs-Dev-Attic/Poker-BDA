@@ -109,8 +109,11 @@ export function NewGameScreen({
             <div className="opp-card" key={i}>
               <span className="emoji">{p.emoji}</span>
               <div className="meta">
-                <div className="name">{p.name} · <span className="muted small">{p.tagline}</span></div>
-                <div className="row" style={{ marginTop: 6 }}>
+                <div className="opp-head">
+                  <div className="name">{p.name} · <span className="muted small">{p.tagline}</span></div>
+                  <button className="opp-remove" onClick={() => removeOpp(i)} aria-label="Remove opponent">✕</button>
+                </div>
+                <div className="opp-selects">
                   <select value={o.persona} onChange={(e) => setOpp(i, { persona: e.target.value as PersonaId })}>
                     {PERSONA_IDS.map((pid) => (
                       <option key={pid} value={pid}>{PERSONAS[pid].name} — {PERSONAS[pid].tagline}</option>
@@ -123,7 +126,6 @@ export function NewGameScreen({
                   </select>
                 </div>
               </div>
-              <button className="btn btn-ghost" onClick={() => removeOpp(i)} aria-label="Remove">✕</button>
             </div>
           )
         })}

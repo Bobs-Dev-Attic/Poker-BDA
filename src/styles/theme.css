@@ -508,16 +508,29 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 
 /* ----- Opponent picker ----- */
 .opp-card {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: flex-start; gap: 12px;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   margin-bottom: 8px;
 }
-.opp-card .emoji { font-size: 30px; }
-.opp-card .meta { flex: 1; }
+.opp-card .emoji { font-size: 30px; line-height: 1.2; flex-shrink: 0; }
+.opp-card .meta { flex: 1; min-width: 0; }
 .opp-card .name { font-weight: 700; }
+.opp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.opp-remove {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 13px;
+  display: grid; place-items: center;
+}
+.opp-selects { display: flex; gap: 8px; margin-top: 8px; }
+.opp-selects select { flex: 1; min-width: 0; }
 .opp-card select {
   background: var(--surface-2);
   color: var(--text);
