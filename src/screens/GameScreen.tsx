@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import type { Screen } from '../App'
 import { PlayingCard } from '../components/PlayingCard'
 import { fmt, ringPositions } from '../components/util'
@@ -57,6 +58,11 @@ export function GameScreen({
   const [toasts, setToasts] = useState<{ key: number; text: string; kind: string }[]>([])
   const seenLog = useRef<Set<number>>(new Set())
   const toastKey = useRef(0)
+  // Drag-to-open/close for the side panels.
+  const [panelDrag, setPanelDrag] = useState<{ side: 'left' | 'right'; progress: number } | null>(null)
+  const leftPanelRef = useRef<HTMLDivElement>(null)
+  const rightPanelRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef({ active: false, side: 'left' as 'left' | 'right', startX: 0, base: 0, w: 300, moved: false })
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const screenRef = useRef<HTMLDivElement>(null)
@@ -159,6 +165,40 @@ export function GameScreen({
     )
     return () => timers.forEach(clearTimeout)
   }, [state.log, settings.showToasts])
+
+  // ---- Drag-to-open/close for the side panels ----
+  const beginDrag = (side: 'left' | 'right', base: number) => (e: ReactPointerEvent<HTMLElement>) => {
+    const w = (side === 'left' ? leftPanelRef : rightPanelRef).current?.offsetWidth || 300
+    dragRef.current = { active: true, side, startX: e.clientX, base, w, moved: false }
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* ignore */ }
+  }
+  const dragProgress = (e: ReactPointerEvent<HTMLElement>): number => {
+    const d = dragRef.current
+    const dx = e.clientX - d.startX
+    if (Math.abs(dx) > 5) d.moved = true
+    const p = d.side === 'left' ? d.base + dx / d.w : d.base - dx / d.w
+    return Math.max(0, Math.min(1, p))
+  }
+  const moveDrag = (e: ReactPointerEvent<HTMLElement>) => {
+    if (!dragRef.current.active) return
+    setPanelDrag({ side: dragRef.current.side, progress: dragProgress(e) })
+  }
+  const endDrag = (e: ReactPointerEvent<HTMLElement>) => {
+    const d = dragRef.current
+    if (!d.active) return
+    d.active = false
+    const open = d.moved ? dragProgress(e) > 0.5 : d.base < 0.5
+    setPanelDrag(null)
+    if (d.side === 'left') setHistoryOpen(open)
+    else setAnalysisOpen(open)
+  }
+  const panelStyle = (side: 'left' | 'right'): CSSProperties | undefined => {
+    if (panelDrag && panelDrag.side === side) {
+      const off = side === 'left' ? (panelDrag.progress - 1) * 100 : (1 - panelDrag.progress) * 100
+      return { transform: `translateX(${off}%)`, transition: 'none' }
+    }
+    return undefined
+  }
 
   // Keep the slide-out panels scrolled to their latest entry.
   useEffect(() => {
@@ -488,19 +528,25 @@ export function GameScreen({
         </div>
       </div>
 
-      {/* Edge handles to reveal the slide-out panels */}
-      <button className="edge-handle left" data-no-snapshot="true" onClick={() => setHistoryOpen(true)} aria-label="Game-play history">📜</button>
-      <button className="edge-handle right" data-no-snapshot="true" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
+      {/* Edge handles to reveal the slide-out panels (tap or drag) */}
+      <button
+        className="edge-handle left" data-no-snapshot="true" aria-label="Game-play history"
+        onPointerDown={beginDrag('left', 0)} onPointerMove={moveDrag} onPointerUp={endDrag}
+      >‹📜›</button>
+      <button
+        className="edge-handle right" data-no-snapshot="true" aria-label="Hand analysis"
+        onPointerDown={beginDrag('right', 0)} onPointerMove={moveDrag} onPointerUp={endDrag}
+      >‹🎓›</button>
 
-      {(historyOpen || analysisOpen) && (
+      {(historyOpen || analysisOpen || panelDrag) && (
         <div className="side-backdrop" data-no-snapshot="true" onClick={() => { setHistoryOpen(false); setAnalysisOpen(false) }} />
       )}
 
       {/* Left: game-play history */}
-      <div className={`side-panel left ${historyOpen ? 'open' : ''}`} data-no-snapshot="true">
-        <div className="panel-head">
+      <div ref={leftPanelRef} className={`side-panel left ${historyOpen ? 'open' : ''}`} style={panelStyle('left')} data-no-snapshot="true">
+        <div className="panel-head" onPointerDown={beginDrag('left', 1)} onPointerMove={moveDrag} onPointerUp={endDrag}>
           <h3>📜 Last 5 Hands</h3>
-          <button className="icon-btn" onClick={() => setHistoryOpen(false)} aria-label="Close">✕</button>
+          <button className="icon-btn" onPointerDown={(e) => e.stopPropagation()} onClick={() => setHistoryOpen(false)} aria-label="Close">✕</button>
         </div>
         <div className="panel-body" ref={historyRef}>
           {historyLog.length === 0
@@ -510,10 +556,10 @@ export function GameScreen({
       </div>
 
       {/* Right: hand analysis & advice */}
-      <div className={`side-panel right ${analysisOpen ? 'open' : ''}`} data-no-snapshot="true">
-        <div className="panel-head">
+      <div ref={rightPanelRef} className={`side-panel right ${analysisOpen ? 'open' : ''}`} style={panelStyle('right')} data-no-snapshot="true">
+        <div className="panel-head" onPointerDown={beginDrag('right', 1)} onPointerMove={moveDrag} onPointerUp={endDrag}>
           <h3>🎓 Analysis</h3>
-          <button className="icon-btn" onClick={() => setAnalysisOpen(false)} aria-label="Close">✕</button>
+          <button className="icon-btn" onPointerDown={(e) => e.stopPropagation()} onClick={() => setAnalysisOpen(false)} aria-label="Close">✕</button>
         </div>
         <div className="panel-body" ref={analysisRef}>
           {humanTurn && coach ? (

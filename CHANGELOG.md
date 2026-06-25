@@ -4,6 +4,13 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.3.2] - 2026-06-25 — "Swipe the panels"
+
+### Added
+- Drag-to-open/close for the side panels: pull an edge tab inward to open,
+  drag the panel header back to close (the panel tracks your pointer). Tap
+  still works as a fallback.
+
 ## [1.3.1] - 2026-06-25 — "Pop-up bubbles"
 
 ### Added
@@ -167,6 +174,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.3.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.2
 [1.3.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.1
 [1.3.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.3.0
 [1.2.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.3

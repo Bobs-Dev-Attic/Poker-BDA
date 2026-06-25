@@ -14,6 +14,15 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.3.2',
+    date: '2026-06-25',
+    title: 'Swipe the panels',
+    highlights: ['Drag the side panels open and closed'],
+    changes: [
+      { type: 'added', text: 'Drag the edge tabs inward to pull a side panel open, and drag its header back to close it (the panel follows your finger). Tapping still works too.' },
+    ],
+  },
+  {
     version: '1.3.1',
     date: '2026-06-25',
     title: 'Pop-up bubbles',
