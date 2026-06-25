@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Screen } from '../App'
 import { TopBar } from '../components/TopBar'
 import { PlayingCard } from '../components/PlayingCard'
-import { fmt, seatPositions } from '../components/util'
+import { fmt } from '../components/util'
 import { useSettings } from '../state/settings'
 import { sfx, setSoundEnabled } from '../sound'
 import {
@@ -41,10 +41,6 @@ export function GameScreen({
 
   const humanIndex = state.players.findIndex((p) => p.isHuman)
   const human = state.players[humanIndex]
-  const positions = useMemo(
-    () => seatPositions(state.players.length, humanIndex),
-    [state.players.length, humanIndex],
-  )
 
   // ---- AI turn driver ----
   useEffect(() => {
@@ -190,8 +186,47 @@ export function GameScreen({
     return true
   }
 
+  const renderSeat = (p: Player, i: number, hero: boolean) => {
+    const isActive = i === state.toActIndex && !state.handComplete
+    return (
+      <div
+        key={p.id}
+        className={`seat ${isActive ? 'active' : ''} ${p.folded ? 'folded' : ''} ${hero ? 'hero' : ''}`}
+      >
+        {bubble && bubble.seat === i && <div className="bubble">{bubble.text}</div>}
+        <div className="seat-id">
+          <div className="avatar">{p.isHuman ? '🧑' : p.avatar}</div>
+          <div className="nameplate">
+            <div className="nm">{p.name}{state.dealer === i ? ' 🔘' : ''}</div>
+            <div className="ch">{fmt(p.chips)}{p.allIn ? ' · ALL-IN' : ''}</div>
+          </div>
+        </div>
+        {p.lastAction && !state.handComplete && <div className="last-action">{p.lastAction}</div>}
+        {state.handComplete && winnerIds.has(p.id) && (
+          <div className="last-action win">WINNER</div>
+        )}
+        {!p.busted && p.hole.length > 0 && (
+          <div className="card-row">
+            {p.hole.map((c, ci) => (
+              <PlayingCard
+                key={ci}
+                card={c}
+                size={hero ? 'lg' : 'sm'}
+                faceDown={!shouldReveal(p)}
+                folded={p.folded}
+              />
+            ))}
+          </div>
+        )}
+        {p.result && shouldReveal(p) && !p.isHuman && (
+          <div className="tiny">{p.result.name}</div>
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div className="app" style={{ padding: 0 }}>
+    <div className="game-screen">
       <TopBar
         title={`Hand #${state.handNumber}`}
         onBack={() => go('home')}
@@ -200,6 +235,10 @@ export function GameScreen({
 
       <div className="table-wrap">
         <div className="felt">
+          <div className="opponents">
+            {state.players.map((p, i) => (p.isHuman ? null : renderSeat(p, i, false)))}
+          </div>
+
           <div className="table-center">
             <div className="pot-display">💰 Pot {fmt(state.pot)}</div>
             <div className="community">
@@ -209,55 +248,13 @@ export function GameScreen({
             </div>
           </div>
 
-          <div className="seats">
-            {state.players.map((p, i) => {
-              const pos = positions[i]
-              const isActive = i === state.toActIndex && !state.handComplete
-              return (
-                <div
-                  key={p.id}
-                  className={`seat ${isActive ? 'active' : ''} ${p.folded ? 'folded' : ''}`}
-                  style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-                >
-                  {bubble && bubble.seat === i && <div className="bubble">{bubble.text}</div>}
-                  <div className="avatar">{p.isHuman ? '🧑' : p.avatar}</div>
-                  <div className="nameplate">
-                    <div className="nm">{p.name}{state.dealer === i ? ' 🔘' : ''}</div>
-                    <div className="ch">{fmt(p.chips)}{p.allIn ? ' · ALL-IN' : ''}</div>
-                  </div>
-                  {p.lastAction && !state.handComplete && (
-                    <div className="last-action">{p.lastAction}</div>
-                  )}
-                  {state.handComplete && winnerIds.has(p.id) && (
-                    <div className="last-action" style={{ color: 'var(--success)' }}>WINNER</div>
-                  )}
-                  {/* hole cards */}
-                  {!p.busted && p.hole.length > 0 && (
-                    <div className="card-row" style={{ justifyContent: 'center', marginTop: 4 }}>
-                      {p.hole.map((c, ci) => (
-                        <PlayingCard
-                          key={ci}
-                          card={c}
-                          size="sm"
-                          faceDown={!shouldReveal(p)}
-                          folded={p.folded}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {p.result && shouldReveal(p) && !p.isHuman && (
-                    <div className="tiny" style={{ marginTop: 2 }}>{p.result.name}</div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+          <div className="hero-area">{renderSeat(human, humanIndex, true)}</div>
         </div>
       </div>
 
       {/* Log */}
       <div className="log">
-        {state.log.slice(-5).map((l) => (
+        {state.log.slice(-4).map((l) => (
           <div key={l.id} className={l.kind}>{l.text}</div>
         ))}
       </div>

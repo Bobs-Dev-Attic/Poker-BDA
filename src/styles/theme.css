@@ -282,41 +282,71 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 }
 .anim .playing-card, .anim .card-back { animation: deal-in 0.28s ease both; }
 
-/* ----- Poker table ----- */
-.table-wrap {
-  flex: 1;
-  position: relative;
+/* ----- Poker table -----
+   The whole game screen is a fixed-height flex column so the action bar is
+   always on screen. The felt is itself a flex column (opponents / board /
+   you) that fills the space evenly — no dead vertical gap, full width. */
+.game-screen {
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
   overflow: hidden;
+}
+.table-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: var(--bg);
 }
 .felt {
   flex: 1;
-  margin: 10px;
-  border-radius: 140px / 90px;
+  min-height: 0;
+  margin: 4px;
+  border-radius: 30px / 26px;
   background: var(--felt);
-  border: 10px solid var(--felt-rail, #3a2417);
-  box-shadow: inset 0 0 60px rgba(0,0,0,0.5), var(--shadow);
-  position: relative;
-  min-height: 380px;
+  border: 6px solid var(--felt-rail, #3a2417);
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.55), var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 6px;
+  overflow: hidden;
 }
-.seats { position: absolute; inset: 0; }
+.opponents {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  width: 100%;
+}
+.hero-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 .seat {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 104px;
+  position: relative;
+  width: 92px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+.seat.hero { width: auto; }
 .seat .avatar {
-  width: 40px; height: 40px;
+  width: 38px; height: 38px;
   border-radius: 50%;
   background: var(--surface-2);
   display: grid; place-items: center;
-  font-size: 22px;
-  margin: 0 auto 2px;
+  font-size: 20px;
   border: 2px solid var(--border);
+  flex-shrink: 0;
 }
+.seat.hero .avatar { width: 34px; height: 34px; font-size: 18px; }
+.seat .seat-id { display: flex; align-items: center; gap: 6px; }
+.seat.hero .seat-id { gap: 8px; }
 .seat.active .avatar { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent); }
 .seat.folded { opacity: 0.45; }
 .seat .nameplate {
@@ -324,7 +354,8 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   border-radius: 8px;
   padding: 3px 6px;
   font-size: 11px;
-  line-height: 1.3;
+  line-height: 1.25;
+  text-align: left;
 }
 .seat .nameplate .nm { font-weight: 700; }
 .seat .nameplate .ch { color: var(--accent); font-weight: 700; }
@@ -334,43 +365,21 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   background: var(--surface-2);
   border-radius: 6px;
   padding: 1px 6px;
-  display: inline-block;
 }
-.seat .bet-chip {
-  position: absolute;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font-size: 10px; font-weight: 700;
-  border-radius: 999px;
-  padding: 1px 7px;
-}
-.dealer-btn {
-  position: absolute;
-  width: 18px; height: 18px;
-  background: #fff; color: #111;
-  border-radius: 50%;
-  font-size: 10px; font-weight: 800;
-  display: grid; place-items: center;
-}
+.seat .last-action.win { color: var(--success); }
+.seat .card-row { margin-top: 4px; justify-content: center; }
 
-.table-center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  width: 90%;
-}
+.table-center { text-align: center; }
 .pot-display {
   font-weight: 700;
   background: rgba(0,0,0,0.4);
   padding: 4px 12px;
   border-radius: 999px;
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 13px;
 }
-.community { display: flex; gap: 5px; justify-content: center; min-height: 64px; }
+.community { display: flex; gap: 5px; justify-content: center; min-height: 66px; }
 
 /* ----- Action bar ----- */
 .action-bar {
@@ -415,13 +424,15 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 
 /* ----- Log / chat ----- */
 .log {
-  max-height: 90px;
+  max-height: 58px;
   overflow-y: auto;
   font-size: 12px;
+  line-height: 1.35;
   color: var(--text-dim);
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-top: 1px solid var(--border);
   background: var(--bg-2);
+  flex-shrink: 0;
 }
 .log .chat { color: var(--accent); font-style: italic; }
 .log .showdown { color: var(--success); }
