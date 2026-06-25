@@ -14,6 +14,18 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.1',
+    date: '2026-06-25',
+    title: 'Table layout & menu',
+    highlights: ['Your cards are always visible — even at a full table'],
+    changes: [
+      { type: 'fixed', text: 'Your hole cards are now in a dedicated strip that stays visible with up to 7 players.' },
+      { type: 'changed', text: 'The action log and live analysis now share one row in two columns to save space.' },
+      { type: 'changed', text: 'Slimmer in-game header with a ☰ menu for quick access to Home, New Game, Practice, and more.' },
+      { type: 'changed', text: 'Community cards are centered on the felt now that your seat sits below it.' },
+    ],
+  },
+  {
     version: '1.1.0',
     date: '2026-06-25',
     title: 'Coaching & practice tools',

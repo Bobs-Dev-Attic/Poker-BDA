@@ -4,6 +4,19 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.1] - 2026-06-25 — "Table layout & menu"
+
+### Fixed
+- Your hole cards are now in a dedicated strip below the felt, so they stay
+  visible even with a full table (up to 7 players).
+
+### Changed
+- The action log and the live analysis/coach now share a single row in two
+  columns, saving vertical space.
+- Slimmer in-game header with a ☰ menu (Home, New Game, Practice, Learn, Stats,
+  Customize).
+- Community cards are centered on the felt now that the hero seat is below it.
+
 ## [1.1.0] - 2026-06-25 — "Coaching & practice tools"
 
 ### Added
@@ -66,6 +79,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.1
 [1.1.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.0
 [1.0.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.3
 [1.0.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.2

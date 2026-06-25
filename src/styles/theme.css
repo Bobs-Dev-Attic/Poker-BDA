@@ -323,6 +323,87 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   flex-direction: column;
   overflow: hidden;
 }
+/* Slim in-game header with a menu */
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  padding-top: max(6px, env(safe-area-inset-top));
+  background: var(--grad-bar);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  flex-shrink: 0;
+}
+.game-header .gh-title { font-weight: 700; font-size: 15px; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: var(--grad-surface-2);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.menu-backdrop { position: fixed; inset: 0; z-index: 49; }
+.game-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 8px;
+  z-index: 50;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 6px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+}
+.game-menu button {
+  text-align: left;
+  background: transparent;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.game-menu button:active { background: var(--surface-2); }
+
+/* Your always-visible seat strip */
+.hero-strip {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 6px;
+  background: var(--bg);
+}
+.hero-strip .seat .card-row .playing-card { --cw: 58px; }
+
+/* Log + analysis side by side */
+.info-row {
+  flex-shrink: 0;
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.info-row .log,
+.info-row .analysis {
+  flex: 1 1 50%;
+  width: 50%;
+  min-width: 0;
+  background: var(--bg-2);
+  padding: 6px 10px;
+  max-height: 70px;
+  overflow-y: auto;
+}
+.info-row .log { border-top: none; }
+.info-row .analysis .bar {
+  height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 4px 0;
+}
+.info-row .analysis .bar > i { display: block; height: 100%; background: var(--accent); }
 .table-wrap {
   flex: 1;
   min-height: 0;
@@ -339,11 +420,12 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
   box-shadow: inset 0 0 50px rgba(0,0,0,0.55), var(--shadow);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 16px 8px 12px;
   overflow: hidden;
 }
+.table-center { margin: auto 0; }
 .opponents {
   display: flex;
   justify-content: space-around;

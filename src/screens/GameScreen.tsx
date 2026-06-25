@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Screen } from '../App'
-import { TopBar } from '../components/TopBar'
 import { PlayingCard } from '../components/PlayingCard'
 import { fmt } from '../components/util'
 import { useSettings } from '../state/settings'
@@ -48,6 +47,7 @@ export function GameScreen({
   const [discards, setDiscards] = useState<number[]>([])
   const [bubble, setBubble] = useState<{ seat: number; text: string } | null>(null)
   const [lastReview, setLastReview] = useState<string[]>([])
+  const [menuOpen, setMenuOpen] = useState(false)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
@@ -316,13 +316,30 @@ export function GameScreen({
     )
   }
 
+  const actorName = state.players[state.toActIndex]?.name ?? 'Dealer'
+
   return (
     <div className="game-screen">
-      <TopBar
-        title={`Hand #${state.handNumber}`}
-        onBack={() => go('home')}
-        right={<span className="pill">{fmt(state.pot)} pot</span>}
-      />
+      {/* Slim header with a menu */}
+      <div className="game-header">
+        <button className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">☰</button>
+        <div className="gh-title">Hand #{state.handNumber}</div>
+        <div className="spacer" />
+        <span className="pill">💰 {fmt(state.pot)}</span>
+        {menuOpen && (
+          <>
+            <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
+            <div className="game-menu">
+              <button onClick={() => { setMenuOpen(false); go('home') }}>🏠 Home</button>
+              <button onClick={() => { setMenuOpen(false); onRematch() }}>🎲 New Game</button>
+              <button onClick={() => { setMenuOpen(false); go('practice') }}>🎯 Practice</button>
+              <button onClick={() => { setMenuOpen(false); go('learn') }}>📚 Learn</button>
+              <button onClick={() => { setMenuOpen(false); go('stats') }}>📊 Stats</button>
+              <button onClick={() => { setMenuOpen(false); go('settings') }}>🎨 Customize</button>
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="table-wrap">
         <div className="felt">
@@ -338,16 +355,37 @@ export function GameScreen({
               ))}
             </div>
           </div>
-
-          <div className="hero-area">{renderSeat(human, humanIndex, true)}</div>
         </div>
       </div>
 
-      {/* Log */}
-      <div className="log">
-        {state.log.slice(-4).map((l) => (
-          <div key={l.id} className={l.kind}>{l.text}</div>
-        ))}
+      {/* Your seat & cards — always visible, even at a full table */}
+      <div className="hero-strip">{renderSeat(human, humanIndex, true)}</div>
+
+      {/* Log + analysis, side by side */}
+      <div className="info-row">
+        <div className="log">
+          {state.log.slice(-4).map((l) => (
+            <div key={l.id} className={l.kind}>{l.text}</div>
+          ))}
+        </div>
+        <div className="analysis">
+          {humanTurn && settings.coachMode && coach ? (
+            <>
+              <div className="small">🎓 {coach.hint}</div>
+              <div className="bar"><i style={{ width: `${Math.round(coach.strength * 100)}%` }} /></div>
+              <div className="tiny muted">
+                Win ~{Math.round(coach.strength * 100)}%
+                {coach.potOdds > 0 && ` · Odds ${Math.round(coach.potOdds * 100)}%`}
+              </div>
+            </>
+          ) : humanTurn ? (
+            <div className="small muted">Your move.</div>
+          ) : state.handComplete ? (
+            <div className="small muted">Hand complete.</div>
+          ) : (
+            <div className="small muted">{actorName} is thinking…</div>
+          )}
+        </div>
       </div>
 
       {/* Action area */}
@@ -371,16 +409,6 @@ export function GameScreen({
           />
         ) : humanTurn ? (
           <>
-            {settings.coachMode && coach && (
-              <div className="coach-box">
-                <div>🎓 {coach.hint}</div>
-                <div className="bar"><i style={{ width: `${Math.round(coach.strength * 100)}%` }} /></div>
-                <div className="tiny muted">
-                  Win chance ~{Math.round(coach.strength * 100)}%
-                  {coach.potOdds > 0 && ` · Pot odds ${Math.round(coach.potOdds * 100)}%`}
-                </div>
-              </div>
-            )}
             {la.canRaise && (
               <div className="bet-controls">
                 <div className="bet-row">
@@ -421,8 +449,10 @@ export function GameScreen({
             </div>
           </>
         ) : (
-          <div className="center muted small" style={{ padding: '14px 0' }}>
-            {state.players[state.toActIndex]?.name ?? 'Dealer'} is thinking…
+          <div className="action-buttons">
+            <button className="btn" disabled>Fold</button>
+            <button className="btn" disabled>Check</button>
+            <button className="btn btn-primary" disabled>Raise</button>
           </div>
         )}
       </div>
