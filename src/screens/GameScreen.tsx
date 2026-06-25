@@ -21,6 +21,7 @@ import { reviewHand } from '../poker/coach'
 import type { Decision } from '../poker/coach'
 import { addHandRecord } from '../state/history'
 import { pushBankrollDelta } from '../state/bankroll'
+import { shareSnapshot } from '../snapshot'
 
 const rng = Math.random
 
@@ -52,6 +53,8 @@ export function GameScreen({
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
+  const screenRef = useRef<HTMLDivElement>(null)
+  const logRef = useRef<HTMLDivElement>(null)
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
   // Per-hand tracking of the human's play, for learning metrics.
   const handFlags = useRef({ voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 })
@@ -238,6 +241,24 @@ export function GameScreen({
     setState((s) => startHand(s, rng))
   }
 
+  const takeSnapshot = async () => {
+    setMenuOpen(false)
+    const node = screenRef.current
+    if (!node) return
+    const bg = getComputedStyle(document.body).backgroundColor || '#0b1418'
+    // Wait a frame so the menu overlay is gone before capturing.
+    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    const result = await shareSnapshot(node, bg)
+    if (result === 'downloaded') sfx('chip')
+    else if (result === 'failed') window.alert('Could not create the snapshot on this device.')
+  }
+
+  // Keep the game-play log scrolled to the latest line.
+  useEffect(() => {
+    const el = logRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [state.log])
+
   // ---- Coach analysis (human turn) ----
   const coach = useMemo(() => {
     if (!isHumanTurn(state) || state.awaitingDraw) return null
@@ -322,10 +343,13 @@ export function GameScreen({
     )
   }
 
+  const minHand = Math.max(0, state.handNumber - 4)
+  const visibleLog = state.log.filter((l) => (l.handNumber ?? state.handNumber) >= minHand)
+
   return (
-    <div className="game-screen">
+    <div className="game-screen" ref={screenRef}>
       {/* Slim header with a menu */}
-      <div className="game-header">
+      <div className="game-header" data-no-snapshot="true">
         <button className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">☰</button>
         <div className="gh-title">Hand #{state.handNumber}</div>
         <div className="spacer" />
@@ -337,6 +361,7 @@ export function GameScreen({
             <div className="game-menu">
               <button onClick={() => { setMenuOpen(false); go('home') }}>🏠 Home</button>
               <button onClick={() => { setMenuOpen(false); onRematch() }}>🎲 New Game</button>
+              <button onClick={takeSnapshot}>📸 Save snapshot</button>
               <button onClick={() => { setMenuOpen(false); go('practice') }}>🎯 Practice</button>
               <button onClick={() => { setMenuOpen(false); go('learn') }}>📚 Learn</button>
               <button onClick={() => { setMenuOpen(false); go('stats') }}>📊 Stats</button>
@@ -366,9 +391,9 @@ export function GameScreen({
       {/* Your seat & cards — always visible, even at a full table */}
       <div className="hero-strip">{renderSeat(human, humanIndex, true)}</div>
 
-      {/* Game-play log (includes winnings) */}
-      <div className="log">
-        {state.log.slice(-4).map((l) => (
+      {/* Game-play log — last 5 hands, includes winnings */}
+      <div className="log" ref={logRef}>
+        {visibleLog.map((l) => (
           <div key={l.id} className={l.kind}>{l.text}</div>
         ))}
       </div>

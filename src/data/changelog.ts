@@ -14,6 +14,16 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.5',
+    date: '2026-06-25',
+    title: 'Snapshots & longer log',
+    highlights: ['Save a snapshot even when device screenshots are blocked'],
+    changes: [
+      { type: 'added', text: 'Save snapshot: capture the table as an image to share or download — works even when the OS blocks screenshots (e.g. Incognito). Find it in the in-game ☰ menu.' },
+      { type: 'changed', text: 'The game-play log now keeps the last 5 hands and auto-scrolls to the latest action.' },
+    ],
+  },
+  {
     version: '1.1.4',
     date: '2026-06-25',
     title: 'Tighter table',

@@ -76,6 +76,7 @@ export interface LogEntry {
   text: string
   kind: 'system' | 'action' | 'showdown' | 'chat'
   playerId?: string
+  handNumber: number
 }
 
 export interface GameState {

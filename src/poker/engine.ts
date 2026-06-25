@@ -44,7 +44,7 @@ export const VARIANTS: Record<VariantId, VariantSpec> = {
 // ---------------------------------------------------------------------------
 
 function log(state: GameState, text: string, kind: LogEntry['kind'], playerId?: string) {
-  state.log = [...state.log, { id: logCounter++, text, kind, playerId }]
+  state.log = [...state.log, { id: logCounter++, text, kind, playerId, handNumber: state.handNumber }]
   // Keep the log from growing without bound.
   if (state.log.length > 200) state.log = state.log.slice(-200)
 }

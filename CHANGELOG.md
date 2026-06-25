@@ -4,6 +4,16 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.5] - 2026-06-25 — "Snapshots & longer log"
+
+### Added
+- Save snapshot (in-game ☰ menu): renders the table to a PNG to share or
+  download via `html-to-image`. Works even when the OS blocks screenshots
+  (e.g. Incognito), since it doesn't use the system screenshot path.
+
+### Changed
+- The game-play log keeps the last 5 hands and auto-scrolls to the latest action.
+
 ## [1.1.4] - 2026-06-25 — "Tighter table"
 
 ### Changed
@@ -103,6 +113,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.5]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.5
 [1.1.4]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.4
 [1.1.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.3
 [1.1.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.2

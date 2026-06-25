@@ -566,7 +566,7 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 
 /* ----- Log / chat ----- */
 .log {
-  max-height: 74px;
+  max-height: 88px;
   overflow-y: auto;
   font-size: 12px;
   line-height: 1.4;
