@@ -14,6 +14,24 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.0.1',
+    date: '2026-06-25',
+    title: 'Table polish',
+    highlights: [
+      'Roomier game table that fills the screen',
+      'Richer look with diagonal gradients and depth',
+    ],
+    changes: [
+      { type: 'changed', text: 'Widened the layout so the table, log, coach box, slider, and buttons use the full screen width.' },
+      { type: 'changed', text: 'Rebuilt the table layout: opponents across the top, board centered, you at the bottom — no wasted vertical space.' },
+      { type: 'changed', text: 'Added diagonal gradients and subtle highlights to buttons and panels so they no longer look flat.' },
+      { type: 'changed', text: 'Bigger, easier-to-tap action buttons and bet amount.' },
+      { type: 'fixed', text: 'Action buttons no longer get pushed off the bottom of the screen.' },
+      { type: 'fixed', text: 'Top opponent’s avatar is no longer clipped by the table edge.' },
+      { type: 'fixed', text: 'Remove (✕) button on the New Game opponent cards no longer overflows the card.' },
+    ],
+  },
+  {
     version: '1.0.0',
     date: '2026-06-25',
     title: 'First deal',

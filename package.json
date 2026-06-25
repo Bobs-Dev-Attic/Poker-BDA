@@ -1,7 +1,7 @@
 {
   "name": "poker-bda",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Poker BDA — learn and play a variety of poker games against AI opponents with distinct skills and personas.",
   "scripts": {

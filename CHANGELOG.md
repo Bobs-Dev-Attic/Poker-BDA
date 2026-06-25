@@ -4,6 +4,21 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.0.1] - 2026-06-25 — "Table polish"
+
+### Changed
+- Widened the layout (max width 960px) so the game table, action log, coach
+  box, bet slider, and buttons use the full screen width.
+- Rebuilt the table as a flex column — opponents across the top, board
+  centered, you at the bottom — removing the dead vertical gap.
+- Added diagonal gradients and inset highlights to buttons and panels for depth.
+- Larger action buttons and bet-amount display.
+
+### Fixed
+- Action buttons no longer pushed off the bottom of the screen.
+- Top opponent's avatar no longer clipped by the table edge.
+- Remove (✕) button on New Game opponent cards no longer overflows the card.
+
 ## [1.0.0] - 2026-06-25 — "First deal"
 
 ### Added
@@ -21,4 +36,5 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.0.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.1
 [1.0.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.0
