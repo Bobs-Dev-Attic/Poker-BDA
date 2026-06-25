@@ -4,6 +4,12 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.0.2] - 2026-06-25 — "New look"
+
+### Added
+- New Poker BDA app icon, used on the home screen, the browser tab/favicon, the
+  PWA install icon, and in the README.
+
 ## [1.0.1] - 2026-06-25 — "Table polish"
 
 ### Changed
@@ -36,5 +42,6 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.0.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.2
 [1.0.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.1
 [1.0.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.0

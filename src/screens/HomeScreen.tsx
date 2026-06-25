@@ -10,7 +10,7 @@ export function HomeScreen({ go }: { go: (s: Screen) => void }) {
   return (
     <>
       <div className="home-hero">
-        <div className="logo">♠️♥️♦️♣️</div>
+        <img className="app-logo" src="/icon-512.png" alt="Poker BDA" width={132} height={132} />
         <h1>{APP_NAME}</h1>
         <div className="ver">Play • Learn • Master · v{APP_VERSION}</div>
       </div>

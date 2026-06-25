@@ -14,6 +14,15 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.0.2',
+    date: '2026-06-25',
+    title: 'New look',
+    highlights: ['Brand-new app icon'],
+    changes: [
+      { type: 'added', text: 'New Poker BDA app icon — shown on the home screen, browser tab, and when installed to your home screen.' },
+    ],
+  },
+  {
     version: '1.0.1',
     date: '2026-06-25',
     title: 'Table polish',

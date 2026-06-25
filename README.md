@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./public/icon-512.png" alt="Poker BDA" width="160" />
+</p>
+
 # ♠️ Poker BDA
 
 A mobile-first **Progressive Web App** for learning and playing a variety of

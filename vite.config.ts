@@ -8,19 +8,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['apple-touch-icon.png'],
       manifest: {
         name: 'Poker BDA',
         short_name: 'Poker',
         description: 'Learn and play a variety of poker games against AI opponents.',
-        theme_color: '#0d3b2e',
+        theme_color: '#1b3a6b',
         background_color: '#0b1418',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         icons: [
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
