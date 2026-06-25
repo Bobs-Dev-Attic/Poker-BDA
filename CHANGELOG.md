@@ -4,6 +4,12 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.2.2] - 2026-06-25 — "History at hand"
+
+### Added
+- 📜 history icon in the top bar (next to 📸) opens a scrollable log of the last 5 hands.
+- The 🎓 Hand Analysis dialog now embeds the game-play history.
+
 ## [1.2.1] - 2026-06-25 — "Odds at a glance"
 
 ### Added
@@ -133,6 +139,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.2.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.2
 [1.2.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.1
 [1.2.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.0
 [1.1.5]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.5

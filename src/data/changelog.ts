@@ -14,6 +14,16 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.2.2',
+    date: '2026-06-25',
+    title: 'History at hand',
+    highlights: ['Quick access to the last 5 hands'],
+    changes: [
+      { type: 'added', text: 'New 📜 history icon in the top bar (next to 📸) opens a scrollable log of the last 5 hands.' },
+      { type: 'added', text: 'The 🎓 Hand Analysis dialog now includes the game-play history too.' },
+    ],
+  },
+  {
     version: '1.2.1',
     date: '2026-06-25',
     title: 'Odds at a glance',

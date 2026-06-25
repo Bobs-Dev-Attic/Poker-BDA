@@ -356,6 +356,7 @@ export function GameScreen({
         <button className="gh-readout" onClick={() => setLogOpen(true)} title="Tap for the last 5 hands">
           {latestLog}
         </button>
+        <button className="icon-btn" onClick={() => setLogOpen(true)} aria-label="Hand history">📜</button>
         <button className="icon-btn" onClick={takeSnapshot} aria-label="Save snapshot">📸</button>
         <button className="icon-btn" onClick={() => setAnalysisOpen(true)} aria-label="Hand analysis">🎓</button>
         <span className="pill">💰 {fmt(state.pot)}</span>
@@ -419,6 +420,7 @@ export function GameScreen({
           coach={coach}
           humanTurn={humanTurn}
           review={lastReview}
+          log={visibleLog}
           onClose={() => setAnalysisOpen(false)}
         />
       )}
@@ -551,14 +553,21 @@ function AnalysisDialog({
   coach,
   humanTurn,
   review,
+  log,
   onClose,
 }: {
   state: GameState
   coach: { strength: number; potOdds: number; hint: string } | null
   humanTurn: boolean
   review: string[]
+  log: GameState['log']
   onClose: () => void
 }) {
+  const histRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = histRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
   return (
     <div className="overlay" onClick={onClose}>
       <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
@@ -588,6 +597,13 @@ function AnalysisDialog({
         ) : (
           <div className="small muted">Open this on your turn for live odds, or after a hand for a coach review.</div>
         )}
+
+        <div className="section-title" style={{ margin: '14px 0 6px' }}>Game-play history</div>
+        <div ref={histRef} className="log-dialog-body" style={{ maxHeight: '32vh' }}>
+          {log.length === 0
+            ? <div className="small muted">No actions yet.</div>
+            : log.map((l) => <div key={l.id} className={l.kind} style={{ marginBottom: 2 }}>{l.text}</div>)}
+        </div>
 
         <button className="btn btn-primary btn-block" style={{ marginTop: 14 }} onClick={onClose}>Close</button>
       </div>
