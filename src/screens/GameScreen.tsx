@@ -409,26 +409,35 @@ export function GameScreen({
           />
         ) : humanTurn ? (
           <>
-            {la.canRaise && (
-              <div className="bet-controls">
-                <div className="bet-row">
-                  <input
-                    type="range"
-                    min={la.minRaiseTo}
-                    max={la.maxRaiseTo}
-                    step={Math.max(1, state.bigBlind)}
-                    value={raiseTo}
-                    onChange={(e) => setRaiseTo(Number(e.target.value))}
-                  />
-                  <span className="bet-amount">{fmt(raiseTo)}</span>
+            {la.canRaise && (() => {
+              const min = la.minRaiseTo
+              const max = la.maxRaiseTo
+              const clamp = (v: number) => Math.min(max, Math.max(min, v))
+              const halfPot = clamp(Math.round((state.currentBet + state.pot * 0.5) / state.bigBlind) * state.bigBlind)
+              const potBet = clamp(state.currentBet + state.pot)
+              const tickPct = max > min ? ((halfPot - min) / (max - min)) * 100 : 0
+              return (
+                <div className="bet-controls">
+                  <div className="bet-row">
+                    <button className="btn pot-btn" onClick={() => setRaiseTo(potBet)}>Pot</button>
+                    <div className="slider-wrap">
+                      <input
+                        type="range"
+                        min={min}
+                        max={max}
+                        step={Math.max(1, state.bigBlind)}
+                        value={raiseTo}
+                        onChange={(e) => setRaiseTo(Number(e.target.value))}
+                      />
+                      <span className="slider-tick" style={{ left: `${tickPct}%` }} title="½ pot">
+                        <span className="tick-label">½</span>
+                      </span>
+                    </div>
+                    <span className="bet-amount">{fmt(raiseTo)}</span>
+                  </div>
                 </div>
-                <div className="quick-bets">
-                  <button className="btn" onClick={() => setRaiseTo(Math.min(la.maxRaiseTo, Math.max(la.minRaiseTo, Math.round(state.currentBet + state.pot * 0.5))))}>½ Pot</button>
-                  <button className="btn" onClick={() => setRaiseTo(Math.min(la.maxRaiseTo, Math.max(la.minRaiseTo, state.currentBet + state.pot)))}>Pot</button>
-                  <button className="btn" onClick={() => setRaiseTo(la.maxRaiseTo)}>All-in</button>
-                </div>
-              </div>
-            )}
+              )
+            })()}
             <div className="action-buttons">
               <button className="btn btn-danger" onClick={doFold}>Fold</button>
               {la.canCheck ? (

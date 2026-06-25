@@ -14,6 +14,17 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.2',
+    date: '2026-06-25',
+    title: 'Streamlined betting',
+    highlights: ['Cleaner bet slider'],
+    changes: [
+      { type: 'changed', text: 'Moved the “Pot” bet button onto the slider row (far left).' },
+      { type: 'changed', text: 'Replaced the “½ Pot” button with a ½-pot marker on the slider.' },
+      { type: 'changed', text: 'Removed the “All-in” button — slide the bet to the max (the Raise button becomes All-in).' },
+    ],
+  },
+  {
     version: '1.1.1',
     date: '2026-06-25',
     title: 'Table layout & menu',

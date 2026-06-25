@@ -4,6 +4,13 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.2] - 2026-06-25 — "Streamlined betting"
+
+### Changed
+- Moved the "Pot" bet button onto the slider row (far left).
+- Replaced the "½ Pot" button with a ½-pot marker on the slider.
+- Removed the "All-in" button — slide to the max (Raise becomes All-in).
+
 ## [1.1.1] - 2026-06-25 — "Table layout & menu"
 
 ### Fixed
@@ -79,6 +86,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.2
 [1.1.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.1
 [1.1.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.0
 [1.0.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.3
