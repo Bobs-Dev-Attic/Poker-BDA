@@ -4,6 +4,21 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.0] - 2026-06-25 — "Coaching & practice tools"
+
+### Added
+- Post-hand coach: after every hand, plain-language feedback on your decisions,
+  grounded in the equity and pot odds at each decision point.
+- Hand History: a reviewable log of recent hands (cards, board, result, coach notes).
+- Odds Trainer: "Call or Fold?" pot-odds drills and a "Count the Outs" quiz,
+  each with an explanation.
+- Equity Calculator: pick two hands and an optional board for exact
+  win/tie/lose % via Monte-Carlo simulation.
+- Preflop Chart: an interactive 169-hand starting-hand chart with
+  position-based (early/middle/late) advice, using the Chen formula.
+- A "Practice" hub on the home screen grouping the learning tools.
+- `equity.ts` engine (heads-up equity, equity vs random, outs counting) with tests.
+
 ## [1.0.3] - 2026-06-25 — "Saved games & deeper stats"
 
 ### Added
@@ -51,6 +66,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.0
 [1.0.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.3
 [1.0.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.2
 [1.0.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.0.1

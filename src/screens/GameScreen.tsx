@@ -18,6 +18,9 @@ import type { GameState, TableConfig, Action, Player } from '../poker/types'
 import { PERSONAS, pickChatter } from '../poker/ai/personas'
 import { evaluateHand } from '../poker/handEvaluator'
 import { loadGame, saveGame, clearGame } from '../state/savedGame'
+import { reviewHand } from '../poker/coach'
+import type { Decision } from '../poker/coach'
+import { addHandRecord } from '../state/history'
 
 const rng = Math.random
 
@@ -44,7 +47,9 @@ export function GameScreen({
   const [raiseTo, setRaiseTo] = useState(0)
   const [discards, setDiscards] = useState<number[]>([])
   const [bubble, setBubble] = useState<{ seat: number; text: string } | null>(null)
+  const [lastReview, setLastReview] = useState<string[]>([])
   const recordedHand = useRef(0)
+  const handDecisions = useRef<Decision[]>([])
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
   // Per-hand tracking of the human's play, for learning metrics.
   const handFlags = useRef({ voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 })
@@ -65,6 +70,7 @@ export function GameScreen({
   // Reset per-hand tracking when a new hand starts.
   useEffect(() => {
     handFlags.current = { voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 }
+    handDecisions.current = []
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.handNumber])
 
@@ -110,6 +116,24 @@ export function GameScreen({
     prevChips.current = human.chips
     const f = handFlags.current
     const humanToShowdown = !!human.result
+
+    // Post-hand coach review + hand-history entry.
+    const review = reviewHand(handDecisions.current, human.hole, humanWon)
+    setLastReview(review)
+    addHandRecord({
+      id: state.handNumber,
+      ts: Date.now(),
+      variant: state.variant,
+      hole: human.hole,
+      board: state.board,
+      resultName: human.result?.name,
+      net: delta,
+      won: humanWon,
+      showdown: humanToShowdown,
+      folded: human.folded,
+      review,
+    })
+
     recordStats({
       handsPlayed: 1,
       handsWon: humanWon ? 1 : 0,
@@ -175,9 +199,21 @@ export function GameScreen({
           f.raised = true
         }
       }
+      // Capture the decision (with equity & price) for the post-hand coach.
+      const la = legalActions(state)
+      const strength = estimateStrength(state, humanIndex, rng)
+      const potOdds = la.callAmount > 0 ? la.callAmount / (state.pot + la.callAmount) : 0
+      handDecisions.current.push({
+        street: state.street,
+        action: action.type,
+        strength,
+        potOdds,
+        toCall: la.callAmount,
+        pot: state.pot,
+      })
       setState((s) => applyAction(s, action, rng))
     },
-    [state.street],
+    [state, humanIndex],
   )
 
   const doFold = () => {
@@ -321,6 +357,7 @@ export function GameScreen({
             state={state}
             human={human}
             gameOver={gameOver}
+            review={lastReview}
             onNext={nextHand}
             onRematch={onRematch}
             onHome={() => go('home')}
@@ -397,6 +434,7 @@ function HandOverPanel({
   state,
   human,
   gameOver,
+  review,
   onNext,
   onRematch,
   onHome,
@@ -404,6 +442,7 @@ function HandOverPanel({
   state: GameState
   human: Player
   gameOver: boolean
+  review: string[]
   onNext: () => void
   onRematch: () => void
   onHome: () => void
@@ -442,6 +481,13 @@ function HandOverPanel({
           <div className="small muted">Your hand: {human.result.name}</div>
         )}
       </div>
+      {review.length > 0 && (
+        <div className="coach-box" style={{ marginBottom: 8 }}>
+          {review.map((r, i) => (
+            <div key={i} style={{ marginBottom: i < review.length - 1 ? 4 : 0 }}>🎓 {r}</div>
+          ))}
+        </div>
+      )}
       <button className="btn btn-primary btn-block" onClick={onNext}>Next Hand →</button>
     </div>
   )

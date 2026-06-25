@@ -41,16 +41,22 @@ export function HomeScreen({ go, onResume }: { go: (s: Screen) => void; onResume
           <span className="d">Rules, rankings & strategy</span>
         </button>
 
-        <button className="menu-tile" onClick={() => go('settings')}>
-          <span className="ico">🎨</span>
-          <span className="t">Customize</span>
-          <span className="d">Themes, cards & rules</span>
+        <button className="menu-tile" onClick={() => go('practice')}>
+          <span className="ico">🎯</span>
+          <span className="t">Practice</span>
+          <span className="d">Trainer, equity & charts</span>
         </button>
 
         <button className="menu-tile" onClick={() => go('stats')}>
           <span className="ico">📊</span>
           <span className="t">Stats</span>
           <span className="d">Track your play</span>
+        </button>
+
+        <button className="menu-tile" onClick={() => go('settings')}>
+          <span className="ico">🎨</span>
+          <span className="t">Customize</span>
+          <span className="d">Themes, cards & rules</span>
         </button>
 
         <button className="menu-tile" onClick={() => go('releases')}>

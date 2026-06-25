@@ -14,6 +14,24 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.0',
+    date: '2026-06-25',
+    title: 'Coaching & practice tools',
+    highlights: [
+      'Post-hand coach reviews every hand you play',
+      'New Practice hub: trainer, equity calculator & preflop chart',
+      'Reviewable hand history with coaching notes',
+    ],
+    changes: [
+      { type: 'added', text: 'Post-hand coach: after each hand, plain-language feedback on your decisions using real equity and pot odds.' },
+      { type: 'added', text: 'Hand History — review your recent hands with cards, board, result, and the coach’s notes.' },
+      { type: 'added', text: 'Odds Trainer — “Call or Fold?” pot-odds drills and a “Count the Outs” quiz, with explanations.' },
+      { type: 'added', text: 'Equity Calculator — pick two hands and a board to see exact win/tie/lose %.' },
+      { type: 'added', text: 'Preflop Chart — an interactive 169-hand starting chart with position-based advice.' },
+      { type: 'added', text: 'New “Practice” hub on the home screen ties the learning tools together.' },
+    ],
+  },
+  {
     version: '1.0.3',
     date: '2026-06-25',
     title: 'Saved games & deeper stats',

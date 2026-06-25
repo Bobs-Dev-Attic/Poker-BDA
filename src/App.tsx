@@ -10,6 +10,11 @@ import { LearnScreen } from './screens/LearnScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { ReleaseNotesScreen } from './screens/ReleaseNotesScreen'
 import { StatsScreen } from './screens/StatsScreen'
+import { PracticeScreen } from './screens/PracticeScreen'
+import { PreflopChartScreen } from './screens/PreflopChartScreen'
+import { OddsTrainerScreen } from './screens/OddsTrainerScreen'
+import { EquityCalcScreen } from './screens/EquityCalcScreen'
+import { HandHistoryScreen } from './screens/HandHistoryScreen'
 
 export type Screen =
   | 'home'
@@ -19,6 +24,11 @@ export type Screen =
   | 'settings'
   | 'releases'
   | 'stats'
+  | 'practice'
+  | 'chart'
+  | 'trainer'
+  | 'equity'
+  | 'history'
 
 export function App() {
   // Resume an in-progress game if one was saved before a refresh/reload.
@@ -55,6 +65,11 @@ export function App() {
       {screen === 'settings' && <SettingsScreen go={go} />}
       {screen === 'releases' && <ReleaseNotesScreen go={go} />}
       {screen === 'stats' && <StatsScreen go={go} />}
+      {screen === 'practice' && <PracticeScreen go={go} />}
+      {screen === 'chart' && <PreflopChartScreen go={go} />}
+      {screen === 'trainer' && <OddsTrainerScreen go={go} />}
+      {screen === 'equity' && <EquityCalcScreen go={go} />}
+      {screen === 'history' && <HandHistoryScreen go={go} />}
       {screen === 'home' && (
         <footer className="center tiny muted" style={{ padding: '8px 0 16px' }}>
           {APP_NAME} v{APP_VERSION}

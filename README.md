@@ -25,6 +25,13 @@ the couch, or offline.
   chart, and a glossary.
 - **Coach mode:** real-time hand strength, pot odds, and a suggested line on your
   turn — toggle off when you want a pure game.
+- **Post-hand coach:** plain-language feedback on your decisions after every hand,
+  grounded in the equity/pot-odds at each point.
+- **Practice hub:** an **Odds Trainer** (pot-odds & outs drills), an **Equity
+  Calculator** (hand vs hand vs board), an interactive **Preflop Chart**, and a
+  **Hand History** with coaching notes.
+- **Self-analysis stats:** VPIP, PFR, Aggression Factor, WTSD, and W$SD, each
+  explained with target ranges.
 - **Deep customization:** themes, accent colors, table felts, card backs, a
   4-color deck option, animations, and sound — all saved on-device.
 - **Stats:** hands played/won, win rate, showdowns, biggest pot, and net chips.
