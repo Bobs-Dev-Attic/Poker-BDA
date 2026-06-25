@@ -14,6 +14,16 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.1.3',
+    date: '2026-06-25',
+    title: 'Bankroll graph',
+    highlights: ['See your chip trend over time'],
+    changes: [
+      { type: 'added', text: 'Bankroll graph on the Stats screen — cumulative net chips across your recent hands.' },
+      { type: 'changed', text: 'Removed the ½-pot marker from the bet slider.' },
+    ],
+  },
+  {
     version: '1.1.2',
     date: '2026-06-25',
     title: 'Streamlined betting',

@@ -4,6 +4,14 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.1.3] - 2026-06-25 — "Bankroll graph"
+
+### Added
+- Bankroll graph on the Stats screen: cumulative net chips over your recent hands.
+
+### Changed
+- Removed the ½-pot marker from the bet slider.
+
 ## [1.1.2] - 2026-06-25 — "Streamlined betting"
 
 ### Changed
@@ -86,6 +94,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.1.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.3
 [1.1.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.2
 [1.1.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.1
 [1.1.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.1.0

@@ -2,13 +2,55 @@ import type { Screen } from '../App'
 import { TopBar } from '../components/TopBar'
 import { useSettings } from '../state/settings'
 import { fmt } from '../components/util'
+import { loadBankroll, clearBankroll } from '../state/bankroll'
 
 function pct(n: number, d: number): number {
   return d > 0 ? Math.round((n / d) * 100) : 0
 }
 
+// Inline SVG line chart of cumulative net chips over recent hands.
+function BankrollChart({ series }: { series: number[] }) {
+  if (series.length < 2) {
+    return (
+      <div className="card-surface center muted small" style={{ marginBottom: 8 }}>
+        Play a few hands to see your bankroll trend.
+      </div>
+    )
+  }
+  const pts = [0, ...series] // start the line at zero
+  const W = 320, H = 130, pad = 10
+  const min = Math.min(0, ...pts)
+  const max = Math.max(0, ...pts)
+  const range = max - min || 1
+  const x = (i: number) => pad + (i / (pts.length - 1)) * (W - pad * 2)
+  const y = (v: number) => pad + (1 - (v - min) / range) * (H - pad * 2)
+  const line = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+  const area = `${pad},${y(min)} ${line} ${(W - pad)},${y(min)}`
+  const last = pts[pts.length - 1]
+  const color = last >= 0 ? 'var(--success)' : 'var(--danger)'
+  const zeroY = y(0)
+  return (
+    <div className="card-surface" style={{ marginBottom: 8, padding: 12 }}>
+      <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
+        <span className="small muted">Bankroll (last {series.length} hands)</span>
+        <span style={{ fontWeight: 800, color }}>{last >= 0 ? '+' : ''}{fmt(last)}</span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="none" style={{ display: 'block' }}>
+        <polygon points={area} fill={color} opacity={0.12} />
+        <line x1={pad} y1={zeroY} x2={W - pad} y2={zeroY} stroke="var(--border)" strokeWidth={1} strokeDasharray="4 4" />
+        <polyline points={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
+    </div>
+  )
+}
+
 export function StatsScreen({ go }: { go: (s: Screen) => void }) {
   const { stats, resetStats } = useSettings()
+  const bankroll = loadBankroll()
+  const onReset = () => {
+    clearBankroll()
+    resetStats()
+  }
   const winRate = pct(stats.handsWon, stats.handsPlayed)
   const vpip = pct(stats.vpipHands, stats.handsPlayed)
   const pfr = pct(stats.pfrHands, stats.handsPlayed)
@@ -29,6 +71,9 @@ export function StatsScreen({ go }: { go: (s: Screen) => void }) {
     <>
       <TopBar title="Your Stats" onBack={() => go('home')} />
       <div className="screen-body">
+        <div className="section-title">Bankroll</div>
+        <BankrollChart series={bankroll} />
+
         <div className="section-title">Results</div>
         <div className="stat-grid">
           <div className="stat-box"><div className="v">{fmt(stats.handsPlayed)}</div><div className="l">Hands Played</div></div>
@@ -78,7 +123,7 @@ export function StatsScreen({ go }: { go: (s: Screen) => void }) {
           target="Around 50%+ suggests you’re showing down strong hands."
         />
 
-        <button className="btn btn-ghost btn-block" style={{ marginTop: 20 }} onClick={resetStats}>
+        <button className="btn btn-ghost btn-block" style={{ marginTop: 20 }} onClick={onReset}>
           Reset stats
         </button>
         <p className="tiny muted center" style={{ marginTop: 10 }}>

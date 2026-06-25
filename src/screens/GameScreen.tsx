@@ -20,6 +20,7 @@ import { loadGame, saveGame, clearGame } from '../state/savedGame'
 import { reviewHand } from '../poker/coach'
 import type { Decision } from '../poker/coach'
 import { addHandRecord } from '../state/history'
+import { pushBankrollDelta } from '../state/bankroll'
 
 const rng = Math.random
 
@@ -114,6 +115,7 @@ export function GameScreen({
       .reduce((m, r) => Math.max(m, r.amount), 0)
     const delta = human.chips - prevChips.current
     prevChips.current = human.chips
+    pushBankrollDelta(delta)
     const f = handFlags.current
     const humanToShowdown = !!human.result
 
@@ -413,9 +415,7 @@ export function GameScreen({
               const min = la.minRaiseTo
               const max = la.maxRaiseTo
               const clamp = (v: number) => Math.min(max, Math.max(min, v))
-              const halfPot = clamp(Math.round((state.currentBet + state.pot * 0.5) / state.bigBlind) * state.bigBlind)
               const potBet = clamp(state.currentBet + state.pot)
-              const tickPct = max > min ? ((halfPot - min) / (max - min)) * 100 : 0
               return (
                 <div className="bet-controls">
                   <div className="bet-row">
@@ -429,9 +429,6 @@ export function GameScreen({
                         value={raiseTo}
                         onChange={(e) => setRaiseTo(Number(e.target.value))}
                       />
-                      <span className="slider-tick" style={{ left: `${tickPct}%` }} title="½ pot">
-                        <span className="tick-label">½</span>
-                      </span>
                     </div>
                     <span className="bet-amount">{fmt(raiseTo)}</span>
                   </div>
