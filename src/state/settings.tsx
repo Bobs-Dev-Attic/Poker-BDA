@@ -32,6 +32,7 @@ export interface Settings {
   showTableOdds: boolean // show pot odds & win % directly on the table
   showHandPotential: boolean // show your most likely finishing hands in analysis
   showCommentary: boolean // opponent reads + advice in the game-play log
+  showToasts: boolean // transient pop-up bubbles for play & advice
   confirmFold: boolean
   autoMuckLosers: boolean
 
@@ -57,6 +58,7 @@ export const DEFAULT_SETTINGS: Settings = {
   showTableOdds: true,
   showHandPotential: true,
   showCommentary: true,
+  showToasts: true,
   confirmFold: false,
   autoMuckLosers: true,
 

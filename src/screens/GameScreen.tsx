@@ -54,6 +54,9 @@ export function GameScreen({
   const [menuOpen, setMenuOpen] = useState(false)
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [toasts, setToasts] = useState<{ key: number; text: string; kind: string }[]>([])
+  const seenLog = useRef<Set<number>>(new Set())
+  const toastKey = useRef(0)
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const screenRef = useRef<HTMLDivElement>(null)
@@ -135,6 +138,27 @@ export function GameScreen({
     appendLog('advice', adviceLine(strength, potOdds, la.callAmount > 0))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.toActIndex, state.handNumber, state.street, state.awaitingDraw, state.handComplete, settings.showCommentary])
+
+  // Seed the "seen" set once so pre-existing log lines (e.g. on resume) don't
+  // pop up as toasts.
+  useEffect(() => {
+    seenLog.current = new Set(state.log.map((l) => l.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Turn new log lines into fading pop-up bubbles.
+  useEffect(() => {
+    const fresh = state.log.filter((l) => !seenLog.current.has(l.id))
+    if (fresh.length === 0) return
+    fresh.forEach((l) => seenLog.current.add(l.id))
+    if (!settings.showToasts) return
+    const added = fresh.slice(-3).map((l) => ({ key: toastKey.current++, text: l.text, kind: l.kind }))
+    setToasts((prev) => [...prev, ...added].slice(-3))
+    const timers = added.map((t) =>
+      setTimeout(() => setToasts((prev) => prev.filter((x) => x.key !== t.key)), 2600),
+    )
+    return () => timers.forEach(clearTimeout)
+  }, [state.log, settings.showToasts])
 
   // Keep the slide-out panels scrolled to their latest entry.
   useEffect(() => {
@@ -454,6 +478,13 @@ export function GameScreen({
 
           {/* You — bottom centre */}
           <div className="hero-seat">{renderSeat(human, humanIndex, true)}</div>
+        </div>
+
+        {/* Transient pop-up bubbles for play & advice */}
+        <div className="toasts" data-no-snapshot="true">
+          {toasts.map((t) => (
+            <div key={t.key} className={`toast ${t.kind}`}>{t.text}</div>
+          ))}
         </div>
       </div>
 

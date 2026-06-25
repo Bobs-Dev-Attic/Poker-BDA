@@ -14,6 +14,16 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.3.1',
+    date: '2026-06-25',
+    title: 'Pop-up bubbles',
+    highlights: ['Fading bubbles surface play & advice as it happens'],
+    changes: [
+      { type: 'added', text: 'Pop-up bubbles on the table briefly show game-play events and advice, then fade after a couple seconds.' },
+      { type: 'added', text: 'Settings → “Pop-up bubbles” toggle to turn them off.' },
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-06-25',
     title: 'Slide-out panels',

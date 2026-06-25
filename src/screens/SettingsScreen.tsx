@@ -123,6 +123,10 @@ export function SettingsScreen({ go }: { go: (s: Screen) => void }) {
           <Toggle on={settings.showCommentary} onChange={(v) => setSettings({ showCommentary: v })} />
         </div>
         <div className="setting-row">
+          <div><div className="label">Pop-up bubbles</div><div className="desc">Briefly show play & advice as fading bubbles on the table.</div></div>
+          <Toggle on={settings.showToasts} onChange={(v) => setSettings({ showToasts: v })} />
+        </div>
+        <div className="setting-row">
           <div><div className="label">Confirm fold</div><div className="desc">Ask before folding when you could check.</div></div>
           <Toggle on={settings.confirmFold} onChange={(v) => setSettings({ confirmFold: v })} />
         </div>
