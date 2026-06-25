@@ -22,6 +22,10 @@ import type { Decision } from '../poker/coach'
 import { addHandRecord } from '../state/history'
 import { pushBankrollDelta } from '../state/bankroll'
 import { shareSnapshot } from '../snapshot'
+import { commentOnAction, adviceLine } from '../poker/commentary'
+import { handPotential } from '../poker/equity'
+import type { Card } from '../poker/cards'
+import type { VariantId } from '../poker/types'
 
 const rng = Math.random
 
@@ -55,6 +59,14 @@ export function GameScreen({
   const recordedHand = useRef(0)
   const handDecisions = useRef<Decision[]>([])
   const screenRef = useRef<HTMLDivElement>(null)
+  const extraLogId = useRef(-1)
+  const advisedKey = useRef('')
+
+  // Append a non-engine log line (commentary / advice). Negative ids never
+  // collide with the engine's positive log ids.
+  const appendLog = useCallback((kind: 'commentary' | 'advice', text: string) => {
+    setState((s) => ({ ...s, log: [...s.log, { id: extraLogId.current--, text, kind, handNumber: s.handNumber }] }))
+  }, [])
   const prevChips = useRef(state.players.find((p) => p.isHuman)?.chips ?? config.startingChips)
   // Per-hand tracking of the human's play, for learning metrics.
   const handFlags = useRef({ voluntary: false, raised: false, sawFlop: false, betRaise: 0, call: 0 })
@@ -101,10 +113,28 @@ export function GameScreen({
       else if (action.type === 'check') sfx('check')
       else sfx('bet')
       setState((s) => applyAction(s, action, rng))
+      if (settings.showCommentary) {
+        const note = commentOnAction(actor, action, state)
+        if (note) appendLog('commentary', note)
+      }
     }, delay)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, settings.animations])
+
+  // ---- Advice line when it becomes the human's turn ----
+  useEffect(() => {
+    if (!settings.showCommentary) return
+    if (!isHumanTurn(state) || state.awaitingDraw || state.handComplete) return
+    const key = `${state.handNumber}:${state.street}:${state.toActIndex}`
+    if (advisedKey.current === key) return
+    advisedKey.current = key
+    const la = legalActions(state)
+    const strength = estimateStrength(state, humanIndex, rng)
+    const potOdds = la.callAmount > 0 ? la.callAmount / (state.pot + la.callAmount) : 0
+    appendLog('advice', adviceLine(strength, potOdds, la.callAmount > 0))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.toActIndex, state.handNumber, state.street, state.awaitingDraw, state.handComplete, settings.showCommentary])
 
   // ---- Record stats once per completed hand ----
   useEffect(() => {
@@ -421,6 +451,10 @@ export function GameScreen({
           humanTurn={humanTurn}
           review={lastReview}
           log={visibleLog}
+          hole={human.hole}
+          board={state.board}
+          variant={state.variant}
+          showPotential={settings.showHandPotential}
           onClose={() => setAnalysisOpen(false)}
         />
       )}
@@ -554,6 +588,10 @@ function AnalysisDialog({
   humanTurn,
   review,
   log,
+  hole,
+  board,
+  variant,
+  showPotential,
   onClose,
 }: {
   state: GameState
@@ -561,6 +599,10 @@ function AnalysisDialog({
   humanTurn: boolean
   review: string[]
   log: GameState['log']
+  hole: Card[]
+  board: Card[]
+  variant: VariantId
+  showPotential: boolean
   onClose: () => void
 }) {
   const histRef = useRef<HTMLDivElement>(null)
@@ -568,6 +610,16 @@ function AnalysisDialog({
     const el = histRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [])
+
+  // Most likely finishing hands (computed once when the dialog opens).
+  const potential = useMemo(() => {
+    if (!showPotential || variant !== 'holdem' || hole.length !== 2 || board.length >= 5 || state.handComplete) {
+      return []
+    }
+    return handPotential(hole, board).slice(0, 3)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div className="overlay" onClick={onClose}>
       <div className="result-card" style={{ textAlign: 'left' }} onClick={(e) => e.stopPropagation()}>
@@ -579,13 +631,9 @@ function AnalysisDialog({
         {humanTurn && coach ? (
           <>
             <div className="small" style={{ marginBottom: 6 }}>{coach.hint}</div>
-            <div className="coach-box" style={{ marginBottom: 0 }}>
-              <div className="tiny muted">Win chance</div>
-              <div className="bar"><i style={{ width: `${Math.round(coach.strength * 100)}%` }} /></div>
-              <div className="row" style={{ justifyContent: 'space-between' }}>
-                <span className="small">~{Math.round(coach.strength * 100)}% to win</span>
-                {coach.potOdds > 0 && <span className="small muted">Pot odds {Math.round(coach.potOdds * 100)}%</span>}
-              </div>
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <span style={{ fontWeight: 700 }}>~{Math.round(coach.strength * 100)}% to win</span>
+              {coach.potOdds > 0 && <span className="small muted">Pot odds {Math.round(coach.potOdds * 100)}%</span>}
             </div>
           </>
         ) : state.handComplete && review.length > 0 ? (
@@ -598,8 +646,20 @@ function AnalysisDialog({
           <div className="small muted">Open this on your turn for live odds, or after a hand for a coach review.</div>
         )}
 
+        {potential.length > 0 && (
+          <>
+            <div className="section-title" style={{ margin: '14px 0 6px' }}>Most likely hands</div>
+            {potential.map((h) => (
+              <div className="potential-row" key={h.category}>
+                <span>{h.name}</span>
+                <span className="potential-pct">{Math.round(h.pct * 100)}%</span>
+              </div>
+            ))}
+          </>
+        )}
+
         <div className="section-title" style={{ margin: '14px 0 6px' }}>Game-play history</div>
-        <div ref={histRef} className="log-dialog-body" style={{ maxHeight: '32vh' }}>
+        <div ref={histRef} className="log-dialog-body" style={{ maxHeight: '28vh' }}>
           {log.length === 0
             ? <div className="small muted">No actions yet.</div>
             : log.map((l) => <div key={l.id} className={l.kind} style={{ marginBottom: 2 }}>{l.text}</div>)}

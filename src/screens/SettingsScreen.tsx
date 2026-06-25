@@ -115,6 +115,14 @@ export function SettingsScreen({ go }: { go: (s: Screen) => void }) {
           <Toggle on={settings.showTableOdds} onChange={(v) => setSettings({ showTableOdds: v })} />
         </div>
         <div className="setting-row">
+          <div><div className="label">Hand potential</div><div className="desc">In Analysis, show your most likely finishing hands and their odds.</div></div>
+          <Toggle on={settings.showHandPotential} onChange={(v) => setSettings({ showHandPotential: v })} />
+        </div>
+        <div className="setting-row">
+          <div><div className="label">Table commentary</div><div className="desc">Reads on opponents’ bets and advice in the game-play log.</div></div>
+          <Toggle on={settings.showCommentary} onChange={(v) => setSettings({ showCommentary: v })} />
+        </div>
+        <div className="setting-row">
           <div><div className="label">Confirm fold</div><div className="desc">Ask before folding when you could check.</div></div>
           <Toggle on={settings.confirmFold} onChange={(v) => setSettings({ confirmFold: v })} />
         </div>

@@ -30,6 +30,8 @@ export interface Settings {
   sound: boolean
   coachMode: boolean // show strength/odds hints on your turn
   showTableOdds: boolean // show pot odds & win % directly on the table
+  showHandPotential: boolean // show your most likely finishing hands in analysis
+  showCommentary: boolean // opponent reads + advice in the game-play log
   confirmFold: boolean
   autoMuckLosers: boolean
 
@@ -53,6 +55,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sound: false,
   coachMode: true,
   showTableOdds: true,
+  showHandPotential: true,
+  showCommentary: true,
   confirmFold: false,
   autoMuckLosers: true,
 

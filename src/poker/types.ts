@@ -74,7 +74,7 @@ export interface PotResult {
 export interface LogEntry {
   id: number
   text: string
-  kind: 'system' | 'action' | 'showdown' | 'chat'
+  kind: 'system' | 'action' | 'showdown' | 'chat' | 'commentary' | 'advice'
   playerId?: string
   handNumber: number
 }

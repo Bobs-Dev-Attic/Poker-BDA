@@ -3,7 +3,8 @@
 
 import { makeDeck, cardId, RANKS, SUITS } from './cards'
 import type { Card } from './cards'
-import { evaluateHand } from './handEvaluator'
+import { evaluateHand, CATEGORY_NAME } from './handEvaluator'
+import type { HandCategory } from './handEvaluator'
 
 export interface Equity {
   win: number // 0..1
@@ -80,6 +81,34 @@ export function equityVsRandom(
     if (!lost) score += best === mine ? 1 / tieN : 0
   }
   return score / iters
+}
+
+export interface HandChance {
+  category: HandCategory
+  name: string
+  pct: number // 0..1 — chance of finishing with this hand category
+}
+
+// Distribution of the hand categories you're likely to FINISH with, by running
+// out the remaining board many times. Returns categories sorted most → least
+// likely. (Hold'em; needs at least the hole cards.)
+export function handPotential(
+  hole: Card[],
+  board: Card[],
+  rng: () => number = Math.random,
+  iters = 400,
+): HandChance[] {
+  const deck = remaining([...hole, ...board])
+  const need = 5 - board.length
+  const counts = new Map<number, number>()
+  for (let i = 0; i < iters; i++) {
+    const full = need > 0 ? [...board, ...draw(deck, need, rng)] : board
+    const cat = evaluateHand([...hole, ...full]).category
+    counts.set(cat, (counts.get(cat) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([cat, n]) => ({ category: cat as HandCategory, name: CATEGORY_NAME[cat as HandCategory], pct: n / iters }))
+    .sort((a, b) => b.pct - a.pct)
 }
 
 // Cards that improve your hand to a stronger category — counting only upgrades

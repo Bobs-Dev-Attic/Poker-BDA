@@ -14,6 +14,20 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: '1.2.3',
+    date: '2026-06-25',
+    title: 'Smarter analysis & table talk',
+    highlights: [
+      'See your three most likely hands and their odds',
+      'Live reads on opponents and advice in the log',
+    ],
+    changes: [
+      { type: 'changed', text: 'Hand Analysis: removed the win-chance bar; added your three most likely finishing hands with their odds.' },
+      { type: 'added', text: 'Game-play log now includes 💬 reads on opponents’ bets (by persona) and 🧭 advice on your turn.' },
+      { type: 'added', text: 'Settings: “Hand potential” and “Table commentary” toggles to turn these off.' },
+    ],
+  },
+  {
     version: '1.2.2',
     date: '2026-06-25',
     title: 'History at hand',

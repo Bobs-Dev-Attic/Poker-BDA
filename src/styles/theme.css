@@ -546,6 +546,19 @@ p { margin: 0 0 0.8em; line-height: 1.5; }
 .bi { margin-right: 5px; font-size: 0.95em; }
 .odds-tag { color: #fff; font-weight: 700; opacity: 0.92; }
 
+/* Commentary & advice log lines */
+.commentary { color: #8fc7ff; font-style: italic; }
+.advice { color: var(--accent); font-weight: 600; }
+
+/* "Most likely hands" rows in the analysis dialog */
+.potential-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14px; padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.potential-row:last-child { border-bottom: none; }
+.potential-pct { font-weight: 800; color: var(--accent); }
+
 /* ----- Action bar ----- */
 .action-bar {
   background: var(--grad-bar);

@@ -4,6 +4,17 @@ All notable changes to Poker BDA are documented here. This project follows
 [Semantic Versioning](https://semver.org/). The in-app **What's New** screen is
 generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 
+## [1.2.3] - 2026-06-25 — "Smarter analysis & table talk"
+
+### Changed
+- Hand Analysis: removed the win-chance bar; added your three most likely
+  finishing hands with their odds (Monte-Carlo runout).
+
+### Added
+- Game-play log now includes 💬 persona-based reads on opponents' bets and
+  🧭 advice on your turn.
+- Settings: "Hand potential" and "Table commentary" toggles.
+
 ## [1.2.2] - 2026-06-25 — "History at hand"
 
 ### Added
@@ -139,6 +150,7 @@ generated from `src/data/changelog.ts` — keep the two in sync when releasing.
 - Persistent settings and lifetime stats stored on-device.
 - Installable PWA — add to your home screen and play offline.
 
+[1.2.3]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.3
 [1.2.2]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.2
 [1.2.1]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.1
 [1.2.0]: https://github.com/bobs-dev-attic/poker-bda/releases/tag/v1.2.0
